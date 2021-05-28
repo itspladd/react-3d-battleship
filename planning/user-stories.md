@@ -19,3 +19,5 @@
 - [ ] As a logged-in user, I can play a single game against an AI.
 - [ ] As a logged-in user, I can play a campaign mode against an AI.
 - [ ] As a logged-in user, I can choose multiple game modes with varying rulesets.
+- [ ] As a logged-in user, I can change the color scheme to a light/dark mode.
+- [ ] As a logged-in user, I can change the color scheme of individual game elements to better suit my needs.
