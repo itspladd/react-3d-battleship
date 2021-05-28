@@ -1,8 +1,8 @@
 # Wireframes
 
-![Wireframe 1, showing the main page if a user is not logged in](https://github.com/itspladd/react-3d-battleship/blob/main/planning/wireframe_1.png)
-![Wireframe 2, showing the main page if a user is not logged in](https://github.com/itspladd/react-3d-battleship/blob/main/planning/wireframe_2.png)
-![Wireframe 3, showing the main page if a user is not logged in](https://github.com/itspladd/react-3d-battleship/blob/main/planning/wireframe_3.png)
+![Wireframe 1, showing the main page if a user is not logged in](https://github.com/itspladd/react-3d-battleship/blob/main/planning/screenshots/wireframe_1.png)
+![Wireframe 2, showing the main page if a user is not logged in](https://github.com/itspladd/react-3d-battleship/blob/main/planning/screenshots/wireframe_2.png)
+![Wireframe 3, showing the main page if a user is not logged in](https://github.com/itspladd/react-3d-battleship/blob/main/planning/screenshots/wireframe_3.png)
 
 View live version on Figma:
 
