@@ -19,8 +19,3 @@ This document outlines how the frontend and backend will communicate to allow tw
   - The server checks if the requested lobby is full
     - If full, the server sends a "game:join-lobby--failed" event back
     - If not, the server adds the user to the room and sends a "game:join-lobby--success" to the user and a "game:lobby
-
-
-## Playing a Game
-1. Both users have joined the game and are presented with the "place ships" instructions
-2. 
