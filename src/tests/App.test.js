@@ -11,7 +11,10 @@ test('connects to websocket properly', () => {
   render(<App />);
   const socketAttempt = screen.getByText(/connecting to server.../i)
   expect(socketAttempt).toBeInTheDocument();
+  
+  setTimeout(() => {
+    const socketSuccess = screen.getByText(/connection established/i)
+    expect(socketSuccess).toBeInTheDocument();
+  }, 500)
 
-  const socketSuccess = screen.getByText(/connection established/i)
-  expect(socketSuccess).toBeInTheDocument();
 })
