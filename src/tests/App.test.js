@@ -6,3 +6,12 @@ test('renders learn react link', () => {
   const linkElement = screen.getByText(/learn react/i);
   expect(linkElement).toBeInTheDocument();
 });
+
+test('connects to websocket properly', () => {
+  render(<App />);
+  const socketAttempt = screen.getByText(/connecting to server.../i)
+  expect(socketAttempt).toBeInTheDocument();
+
+  const socketSuccess = screen.getByText(/connection established/i)
+  expect(socketSuccess).toBeInTheDocument();
+})
