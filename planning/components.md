@@ -2,7 +2,7 @@
 
 -App
   - Nav
-  - Game (main game area)
+  - GameWindow (main game area)
     - LoginForm
     - RegisterForm
     - NewGame
@@ -11,7 +11,7 @@
     - GameBoard
       - Tile
   - ContextMenu (shows different data/options depending on app state)
-  - ChatBox
+  - ChatWindow
     - UserList
       - UserListItem
     - ChatLog
