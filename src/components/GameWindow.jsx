@@ -32,6 +32,7 @@ export default function GameWindow() {
     var geometry = new THREE.BoxGeometry( 1, 1, 1 );
     var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
     var cube = new THREE.Mesh( geometry, material );
+    scene.background = new THREE.Color( 'slateblue' )
     scene.add( cube );
     camera.position.z = 5;
     var animate = function () {
@@ -62,7 +63,6 @@ export default function GameWindow() {
   return (
     <div className="game-window">
       <p>Game window</p>
-      
       {/* Assign the renderCanvas ref to this canvas element! */}
       <canvas ref={renderCanvas} />
       <p>{gameState && JSON.stringify(gameState)}</p>
