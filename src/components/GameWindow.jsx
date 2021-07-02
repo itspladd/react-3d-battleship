@@ -32,19 +32,46 @@ export default function GameWindow() {
     var controls = new MapControls(camera, renderCanvas.current)
     controls.screenSpacePanning = true;
     renderer.setSize(window.innerWidth, window.innerHeight);
-    var geometry = new THREE.BoxGeometry(1, 1, 1);
-    var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    var cube = new THREE.Mesh(geometry, material);
-    var hex = makeHexTile(1);
-    hex.position.set(0, 0, 0)
-    console.log(hex)
-    scene.add(hex);
+    var dummyObj = new THREE.Object3D();
+
+    // Make some hexes! For testing!
+    var hexGeometry = new THREE.CylinderBufferGeometry(1.5, 1.5, 0.1, 6);
+    hexGeometry.rotateX(Math.PI * 0.5)
+    let m = new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      roughness: 0.75,
+      metalness: 0.25
+    });
+    let instanceCount = 100;
+    let tiles = new THREE.InstancedMesh(hexGeometry, m, instanceCount);
+    let tile = new THREE.Mesh(hexGeometry, m)
+    let hex = makeHexTile(10)
+    tiles.setMatrixAt(0, new THREE.Matrix4())
+    tiles.setColorAt(0, new THREE.Color('green'))
+    scene.add(tile);
+
+    // Make some cubes! For testing!
+    let box = new THREE.BoxGeometry(1, 1, 1);
+    const cube = new THREE.Mesh(box, m);
+    scene.add(cube)
+    cube.position.x = 5
+    cube.position.y = 5
+    cube.position.z = 5
+
+    scene.background = new THREE.Color('slateblue')
+
+    // Add a light
+    const light = new THREE.DirectionalLight(0xffffff, 0.5)
+    scene.add(light);
+
+    // Add axis helper
+    const axesHelper = new THREE.AxesHelper(5);
+    scene.add(axesHelper)
     camera.position.z = 20;
     camera.position.y = 0;
     camera.position.x = 0;
     var animate = function () {
       requestAnimationFrame(animate);
-      hex.rotation.z += 0.01;
       renderer.render(scene, camera);
     };
     animate();
