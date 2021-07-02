@@ -5,6 +5,7 @@ import '../styles/GameWindow.css'
 
 // Helpers
 import { boardCoordinatesToSceneCoordinates } from '../helpers/boardHelpers'
+import { EdgesGeometry } from 'three';
 
 // Engine
 const { GameEngine, CONSTANTS } = require('@itspladd/battleship-engine')
@@ -54,18 +55,19 @@ export default function GameWindow() {
     let renderer = new THREE.WebGLRenderer({ canvas: renderCanvas.current });
     let controls = new MapControls(camera, renderCanvas.current)
     controls.screenSpacePanning = true;
-    controls.maxAzimuthAngle = 0;
+
+    // Uncomment this to put angle limist on the camera.
+    /* controls.maxAzimuthAngle = 0;
     controls.minAzimuthAngle = 0;
     controls.maxPolarAngle = Math.PI * .8;
-    controls.minPolarAngle = Math.PI / 2;
+    controls.minPolarAngle = Math.PI / 2; */
 
     renderer.setSize(window.innerWidth, window.innerHeight);
 
     // Make and orient the basic hex geometry for all tiles
-    let hexGeometry = new THREE.CylinderBufferGeometry(TILE_RADIUS, TILE_RADIUS, TILE_THICKNESS, 6);
+    const hexGeometry = new THREE.CylinderBufferGeometry(TILE_RADIUS * .95, TILE_RADIUS, TILE_THICKNESS, 6);
     hexGeometry.rotateX(Math.PI * 0.5) // Turn the tile so it's laying "flat"
     hexGeometry.rotateZ(Math.PI * 0.5) // Turn the tile to "point" sideways
-
     // Make the material for all tiles
     let m = new THREE.MeshStandardMaterial({
       color: 0x0066ff,
@@ -90,32 +92,21 @@ export default function GameWindow() {
           tileHeight: TILE_HEIGHT
         }
         const [x, y] = boardCoordinatesToSceneCoordinates(params);
-        testMatrix.makeTranslation(x, y, TILE_BASE + (.05 * tileCounter));
+        testMatrix.makeTranslation(x, y, TILE_BASE);
         tiles.setMatrixAt(tileCounter, testMatrix);
         tileCounter++;
       }
     }
     testMatrix.makeTranslation(0, 0, TILE_BASE)
 
-/*     tiles.setMatrixAt(0, testMatrix)
-    let [x, y] = boardCoordinatesToSceneCoordinates({
-      x: 1,
-      y: 0,
-      tileRadius: TILE_RADIUS,
-      tileHeight: TILE_HEIGHT
-    })
-    testMatrix.makeTranslation(x, y, TILE_BASE)
-    console.log(x, y)
-    tiles.setMatrixAt(1, testMatrix) */
-
     // Make some cubes! For testing!
-    let box = new THREE.BoxGeometry(1, 1, 1);
+/*     let box = new THREE.BoxGeometry(1, 1, 1);
     const cube = new THREE.Mesh(box, m);
     scene.add(cube)
     cube.position.x = 5
     cube.position.y = 5
     cube.position.z = 5
-    console.log(cube.matrix)
+    console.log(cube.matrix) */
     // Add some lights
     const light = new THREE.DirectionalLight(0xffffff, 1)
     const ambientLight = new THREE.AmbientLight( 0xffffff, .5)
