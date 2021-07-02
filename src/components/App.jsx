@@ -2,10 +2,12 @@
 import { useState, useEffect } from 'react';
 import socketClient from 'socket.io-client';
 
+// Components
+import GameWindow from './GameWindow';
+
 // Constants
 import { SOCKET_DATA } from '../constants/socket'
 
-import logo from '../logo.svg';
 import '../styles/App.css';
 
 function App() {
@@ -33,27 +35,15 @@ function App() {
 
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
+      <header>
         <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <p>
-          Socket server: { SOCKET_DATA.SERVER }
-        </p>
-        <p>
+          Socket server: { SOCKET_DATA.SERVER } |&nbsp;
           { !state.socketConnected && 'Connecting to server...' }
           { state.socketConnected && 'Connection established!' }
         </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+
       </header>
+      <GameWindow />
     </div>
   );
 }
