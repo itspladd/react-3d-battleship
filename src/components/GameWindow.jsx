@@ -42,6 +42,11 @@ export default function GameWindow() {
     let renderer = new THREE.WebGLRenderer({ canvas: renderCanvas.current });
     let controls = new MapControls(camera, renderCanvas.current)
     controls.screenSpacePanning = true;
+    controls.maxAzimuthAngle = 0;
+    controls.minAzimuthAngle = 0;
+    controls.maxPolarAngle = Math.PI * .8;
+    controls.minPolarAngle = Math.PI / 2;
+
     renderer.setSize(window.innerWidth, window.innerHeight);
 
     // Make and orient the basic hex geometry for all tiles
@@ -101,6 +106,12 @@ export default function GameWindow() {
   }, [])
 
   const placeTiles = () => {
+
+  }
+
+  // Give it [x, y] for a tile and [xOffset, yOffset] for a location,
+  // and get back the coordinates in the scene where the center of that tile exists.
+  const boardCoordinatesToSceneCoordinates = (x, y, xOffset, yOffset) => {
 
   }
 
