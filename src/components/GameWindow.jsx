@@ -25,6 +25,16 @@ export default function GameWindow() {
     setMoves(CONSTANTS.RULES.DEFAULT_RULES.MOVES);
     setGameState(initEngine.gameState)
 
+    // IMPORTANT CONSTANTS FOR SETTING UP THE HEX TILES
+    // Distance from tile center to a given vertex
+    const HEX_RADIUS = 1.0;
+    // Distance from tile center to center of a given side
+    // calculation: R * sin(60 deg. or 2pi/6 rad.)
+    const HEX_HEIGHT = HEX_RADIUS * Math.sin(Math.PI / 3);
+    // Length of a single tile side
+    // Equal to HEX_RADIUS since this is a regular hexagon.
+    const HEX_SIDE = HEX_RADIUS
+
     // === THREE.JS CODE START ===
     var scene = new THREE.Scene();
     var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
