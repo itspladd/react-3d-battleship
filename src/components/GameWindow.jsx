@@ -27,26 +27,30 @@ export default function GameWindow() {
 
     // IMPORTANT CONSTANTS FOR SETTING UP THE HEX TILES
     // Distance from tile center to a given vertex
-    const HEX_RADIUS = 1.0;
+    const TILE_RADIUS = 1.0;
     // Distance from tile center to center of a given side
     // calculation: R * sin(60 deg. or 2pi/6 rad.)
-    const HEX_HEIGHT = HEX_RADIUS * Math.sin(Math.PI / 3);
+    const TILE_HEIGHT = TILE_RADIUS * Math.sin(Math.PI / 3);
     // Length of a single tile side
     // Equal to HEX_RADIUS since this is a regular hexagon.
-    const HEX_SIDE = HEX_RADIUS
+    const TILE_SIDE = TILE_RADIUS;
+    const TILE_THICKNESS = 0.25;
 
     // === THREE.JS CODE START ===
-    var scene = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    var renderer = new THREE.WebGLRenderer({ canvas: renderCanvas.current });
-    var controls = new MapControls(camera, renderCanvas.current)
+    let scene = new THREE.Scene();
+    let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    let renderer = new THREE.WebGLRenderer({ canvas: renderCanvas.current });
+    let controls = new MapControls(camera, renderCanvas.current)
     controls.screenSpacePanning = true;
     renderer.setSize(window.innerWidth, window.innerHeight);
-    var dummyObj = new THREE.Object3D();
 
-    // Make some hexes! For testing!
-    var hexGeometry = new THREE.CylinderBufferGeometry(1.5, 1.5, 0.25, 6);
-    hexGeometry.rotateX(Math.PI * 0.5)
+    // The dummy object is used to keep track of positions while we place the tiles.
+    let dummy = new THREE.Object3D();
+
+    // Make the 
+    let hexGeometry = new THREE.CylinderBufferGeometry(1.5, 1.5, 0.25, 6);
+    hexGeometry.rotateX(Math.PI * 0.5) // Turn the tile so it's laying "flat"
+    hexGeometry.rotateZ(Math.PI * 0.5) // Turn the tile to "point" sideways
     let m = new THREE.MeshStandardMaterial({
       color: 0x0066ff,
       roughness: 0.75,
@@ -81,7 +85,7 @@ export default function GameWindow() {
     camera.position.z = 20;
     camera.position.y = 0;
     camera.position.x = 0;
-    var animate = function () {
+    let animate = function () {
       requestAnimationFrame(animate);
       renderer.render(scene, camera);
     };
