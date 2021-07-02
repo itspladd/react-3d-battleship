@@ -109,11 +109,7 @@ export default function GameWindow() {
 
   }
 
-  // Give it [x, y] for a tile and [xOffset, yOffset] for a location,
-  // and get back the coordinates in the scene where the center of that tile exists.
-  const boardCoordinatesToSceneCoordinates = (x, y, xOffset, yOffset) => {
 
-  }
 
   const makeHexTile = (radius) => {
     radius = radius || 1;
