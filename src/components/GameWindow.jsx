@@ -71,7 +71,11 @@ export default function GameWindow() {
     scene.background = new THREE.Color('slateblue')
 
     // Add a light
-    const light = new THREE.DirectionalLight(0xffffff, 0.5)
+    const light = new THREE.DirectionalLight(0xffffff, 1)
+    // Move the light out to a better position
+    light.position.x = 0;
+    light.position.y = 0;
+    light.position.z = 10;
     scene.add(light);
 
     // Add axis helper
