@@ -3,6 +3,10 @@ import * as THREE from 'three';
 import { MapControls } from 'three/examples/jsm/controls/OrbitControls'
 import '../styles/GameWindow.css'
 
+// Helpers
+import { boardCoordinatesToSceneCoordinates } from '../helpers/boardHelpers'
+
+// Engine
 const { GameEngine, CONSTANTS } = require('@itspladd/battleship-engine')
 
 export default function GameWindow() {
@@ -23,7 +27,9 @@ export default function GameWindow() {
     const initEngine = new GameEngine(players)
     setEngine(initEngine);
     setMoves(CONSTANTS.RULES.DEFAULT_RULES.MOVES);
-    setGameState(initEngine.gameState)
+
+    const initGameState = initEngine.gameState
+    setGameState(initGameState)
 
     // IMPORTANT CONSTANTS FOR SETTING UP THE HEX TILES
     // Distance from tile center to a given vertex
@@ -35,6 +41,12 @@ export default function GameWindow() {
     // Equal to HEX_RADIUS since this is a regular hexagon.
     const TILE_SIDE = TILE_RADIUS;
     const TILE_THICKNESS = 0.25;
+    // The height of the center of a tile to get it to lay "flat" on the XY plane
+    // (i.e. the back of the tile is at z = 0)
+    const TILE_BASE = TILE_THICKNESS / 2;
+    const BOARD_ROWS = initGameState.players.p1.board.rows;
+    const BOARD_COLS = initGameState.players.p1.board.columns;
+    const TOTAL_TILES = BOARD_ROWS * BOARD_COLS;
 
     // === THREE.JS CODE START ===
     let scene = new THREE.Scene();
@@ -50,7 +62,7 @@ export default function GameWindow() {
     renderer.setSize(window.innerWidth, window.innerHeight);
 
     // Make and orient the basic hex geometry for all tiles
-    let hexGeometry = new THREE.CylinderBufferGeometry(1.5, 1.5, 0.25, 6);
+    let hexGeometry = new THREE.CylinderBufferGeometry(TILE_RADIUS, TILE_RADIUS, TILE_THICKNESS, 6);
     hexGeometry.rotateX(Math.PI * 0.5) // Turn the tile so it's laying "flat"
     hexGeometry.rotateZ(Math.PI * 0.5) // Turn the tile to "point" sideways
 
@@ -62,14 +74,39 @@ export default function GameWindow() {
     });
 
     // Create the instanced mesh for all tiles
-    let instanceCount = 100;
-    let tiles = new THREE.InstancedMesh(hexGeometry, m, instanceCount);
+    let tiles = new THREE.InstancedMesh(hexGeometry, m, TOTAL_TILES);
     scene.add(tiles);
 
+    // Create the base position matrix for the board tiles
     const testMatrix = new THREE.Matrix4();
-    testMatrix.makeTranslation(0, 0, (TILE_THICKNESS / 2))
+    // Make a board!
+    let tileCounter = 0;
+    for (let row = 0; row < BOARD_ROWS; row++) {
+      for (let col = 0; col < BOARD_COLS; col++) {
+        const params = {
+          col,
+          row,
+          tileRadius: TILE_RADIUS,
+          tileHeight: TILE_HEIGHT
+        }
+        const [x, y] = boardCoordinatesToSceneCoordinates(params);
+        testMatrix.makeTranslation(x, y, TILE_BASE + (.05 * tileCounter));
+        tiles.setMatrixAt(tileCounter, testMatrix);
+        tileCounter++;
+      }
+    }
+    testMatrix.makeTranslation(0, 0, TILE_BASE)
 
-    tiles.setMatrixAt(0, testMatrix)
+/*     tiles.setMatrixAt(0, testMatrix)
+    let [x, y] = boardCoordinatesToSceneCoordinates({
+      x: 1,
+      y: 0,
+      tileRadius: TILE_RADIUS,
+      tileHeight: TILE_HEIGHT
+    })
+    testMatrix.makeTranslation(x, y, TILE_BASE)
+    console.log(x, y)
+    tiles.setMatrixAt(1, testMatrix) */
 
     // Make some cubes! For testing!
     let box = new THREE.BoxGeometry(1, 1, 1);
