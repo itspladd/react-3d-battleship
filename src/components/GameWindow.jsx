@@ -44,22 +44,27 @@ export default function GameWindow() {
     controls.screenSpacePanning = true;
     renderer.setSize(window.innerWidth, window.innerHeight);
 
-    // The dummy object is used to keep track of positions while we place the tiles.
-    let dummy = new THREE.Object3D();
-
-    // Make the 
+    // Make and orient the basic hex geometry for all tiles
     let hexGeometry = new THREE.CylinderBufferGeometry(1.5, 1.5, 0.25, 6);
     hexGeometry.rotateX(Math.PI * 0.5) // Turn the tile so it's laying "flat"
     hexGeometry.rotateZ(Math.PI * 0.5) // Turn the tile to "point" sideways
+
+    // Make the material for all tiles
     let m = new THREE.MeshStandardMaterial({
       color: 0x0066ff,
       roughness: 0.75,
       metalness: 0.25
     });
+
+    // Create the instanced mesh for all tiles
     let instanceCount = 100;
     let tiles = new THREE.InstancedMesh(hexGeometry, m, instanceCount);
-    tiles.setMatrixAt(0, new THREE.Matrix4())
     scene.add(tiles);
+
+    const testMatrix = new THREE.Matrix4();
+    testMatrix.makeTranslation(0, 0, (TILE_THICKNESS / 2))
+
+    tiles.setMatrixAt(0, testMatrix)
 
     // Make some cubes! For testing!
     let box = new THREE.BoxGeometry(1, 1, 1);
@@ -68,7 +73,7 @@ export default function GameWindow() {
     cube.position.x = 5
     cube.position.y = 5
     cube.position.z = 5
-
+    console.log(cube.matrix)
     // Add some lights
     const light = new THREE.DirectionalLight(0xffffff, 1)
     const ambientLight = new THREE.AmbientLight( 0xffffff, .5)
@@ -94,6 +99,10 @@ export default function GameWindow() {
     // === THREE.JS CODE END ===
 
   }, [])
+
+  const placeTiles = () => {
+
+  }
 
   const makeHexTile = (radius) => {
     radius = radius || 1;
