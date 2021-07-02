@@ -54,11 +54,9 @@ export default function GameWindow() {
     });
     let instanceCount = 100;
     let tiles = new THREE.InstancedMesh(hexGeometry, m, instanceCount);
-    let tile = new THREE.Mesh(hexGeometry, m)
-    let hex = makeHexTile(10)
     tiles.setMatrixAt(0, new THREE.Matrix4())
     tiles.setColorAt(0, new THREE.Color('green'))
-    scene.add(tile);
+    scene.add(tiles);
 
     // Make some cubes! For testing!
     let box = new THREE.BoxGeometry(1, 1, 1);
