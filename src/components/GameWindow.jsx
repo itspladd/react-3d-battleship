@@ -45,17 +45,16 @@ export default function GameWindow() {
     var dummyObj = new THREE.Object3D();
 
     // Make some hexes! For testing!
-    var hexGeometry = new THREE.CylinderBufferGeometry(1.5, 1.5, 0.1, 6);
+    var hexGeometry = new THREE.CylinderBufferGeometry(1.5, 1.5, 0.25, 6);
     hexGeometry.rotateX(Math.PI * 0.5)
     let m = new THREE.MeshStandardMaterial({
-      color: 0xffffff,
+      color: 0x0066ff,
       roughness: 0.75,
       metalness: 0.25
     });
     let instanceCount = 100;
     let tiles = new THREE.InstancedMesh(hexGeometry, m, instanceCount);
     tiles.setMatrixAt(0, new THREE.Matrix4())
-    tiles.setColorAt(0, new THREE.Color('green'))
     scene.add(tiles);
 
     // Make some cubes! For testing!
@@ -66,15 +65,15 @@ export default function GameWindow() {
     cube.position.y = 5
     cube.position.z = 5
 
-    scene.background = new THREE.Color('slateblue')
-
-    // Add a light
+    // Add some lights
     const light = new THREE.DirectionalLight(0xffffff, 1)
+    const ambientLight = new THREE.AmbientLight( 0xffffff, .5)
     // Move the light out to a better position
     light.position.x = 0;
     light.position.y = 0;
     light.position.z = 10;
     scene.add(light);
+    scene.add(ambientLight)
 
     // Add axis helper
     const axesHelper = new THREE.AxesHelper(5);
