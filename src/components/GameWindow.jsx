@@ -26,41 +26,6 @@ export default function GameWindow() {
   const [mouseData, setMouse] = useState([]);
   let buttonResult = "Click me";
 
-  console.log(engine)
-
-  const placeTiles = () => {
-
-  }
-
-
-
-  const makeHexTile = (radius) => {
-    radius = radius || 1;
-    const points = [];
-    const angleIncrement = (2 * Math.PI) / 6;
-    // Calculate hex points
-    for (let i = 1; i <= 6; i++) {
-      const angle = angleIncrement * i;
-      const x = radius * Math.cos(angle);
-      const y = radius * Math.sin(angle);
-      points.push(new THREE.Vector2(x, y));
-    }
-    console.log(points)
-    const hexShape = new THREE.Shape(points);
-    const extrudeSettings = {
-      steps: 1,
-      depth: 0.5,
-      bevelEnabled: false,
-      bevelThickness: 1,
-      bevelSize: 1,
-      bevelOffset: 0,
-      bevelSegments: 1
-    };
-    const geometry = new THREE.ExtrudeGeometry(hexShape, extrudeSettings);
-    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    return new THREE.Mesh(geometry, material);
-  }
-
   const handleClick = () => {
     console.log('handling click')
     const p1Move = {
