@@ -1,8 +1,14 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import * as THREE from 'three';
 import { MapControls } from 'three/examples/jsm/controls/OrbitControls'
 
-export default function use3DBoard() {
+// Helpers
+import { boardCoordinatesToSceneCoordinates } from '../helpers/boardHelpers'
+import { EdgesGeometry } from 'three';
+
+export default function use3DBoard(canvasRef, gameState) {
+  const [renderer, setRenderer] = useState();
+  const [mouseData, setMouse] = useState([]);
 
   useEffect(() => {
 
@@ -19,15 +25,15 @@ export default function use3DBoard() {
     // The height of the center of a tile to get it to lay "flat" on the XY plane
     // (i.e. the back of the tile is at z = 0)
     const TILE_BASE = TILE_THICKNESS / 2;
-    const BOARD_ROWS = initGameState.players.p1.board.rows;
-    const BOARD_COLS = initGameState.players.p1.board.columns;
+    const BOARD_ROWS = gameState.players.p1.board.rows;
+    const BOARD_COLS = gameState.players.p1.board.columns;
     const TOTAL_TILES = BOARD_ROWS * BOARD_COLS;
   
     // === THREE.JS CODE START ===
     let scene = new THREE.Scene();
     let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    let renderer = new THREE.WebGLRenderer({ canvas: renderCanvas.current });
-    let controls = new MapControls(camera, renderCanvas.current)
+    let renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current });
+    let controls = new MapControls(camera, canvasRef.current)
     controls.screenSpacePanning = true;
   
     // Uncomment this to put angle limist on the camera.
@@ -144,5 +150,7 @@ export default function use3DBoard() {
     // === THREE.JS CODE END ===
   
   }, [])
+
+  return [mouseData]
 }
 

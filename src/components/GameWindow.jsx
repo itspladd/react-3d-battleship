@@ -4,10 +4,9 @@ import '../styles/GameWindow.css'
 
 // Hooks
 import useGameEngine from '../hooks/useGameEngine'
+import use3DBoard from '../hooks/use3DBoard'
 
-// Helpers
-import { boardCoordinatesToSceneCoordinates } from '../helpers/boardHelpers'
-import { EdgesGeometry } from 'three';
+
 
 // Component
 export default function GameWindow() {
@@ -22,8 +21,7 @@ export default function GameWindow() {
   ];
 
   const [engine, moves, gameState, setGameState] = useGameEngine(players);
-  const [renderer, setRenderer] = useState();
-  const [mouseData, setMouse] = useState([]);
+  const [mouseData] = use3DBoard(renderCanvas, gameState);
   let buttonResult = "Click me";
 
   const handleClick = () => {
@@ -43,12 +41,16 @@ export default function GameWindow() {
   return (
     <div className="game-window">
       <div id="info">
-        Info: {mouseData && mouseData.join(', ')}
+        <span>
+          Info: {mouseData && mouseData.join(', ')}
+        </span>
+        <p>
+          <button onClick={() => handleClick()}>Place a ship</button>
+          <p>{gameState && JSON.stringify(gameState.players.p1.board.ships)}</p>
+        </p>
       </div>
       <canvas ref={renderCanvas} />
       {/* Assign the renderCanvas ref to this canvas element! */}
-      <button onClick={() => handleClick()}>{buttonResult}</button>
-      <p>{gameState && JSON.stringify(gameState)}</p>
     </div>
   )
 }
