@@ -18,6 +18,7 @@ export default function GameWindow() {
   const [gameState, setGameState] = useState({});
   const [renderer, setRenderer] = useState();
   const [moves, setMoves] = useState();
+  const [mouseData, setMouse] = useState([]);
   let buttonResult = "Click me";
 
   useEffect(() => {
@@ -71,9 +72,10 @@ export default function GameWindow() {
     // Make the material for all tiles
     let m = new THREE.MeshStandardMaterial({
       color: 0x0066ff,
-      roughness: 0.75,
-      metalness: 0.25
+      roughness: 0.6,
+      metalness: 0.5
     });
+    let tileColor = new THREE.Color('white')
 
     // Create the instanced mesh for all tiles
     let tiles = new THREE.InstancedMesh(hexGeometry, m, TOTAL_TILES);
@@ -94,25 +96,28 @@ export default function GameWindow() {
         const [x, y] = boardCoordinatesToSceneCoordinates(params);
         testMatrix.makeTranslation(x, y, TILE_BASE);
         tiles.setMatrixAt(tileCounter, testMatrix);
+        tiles.setColorAt(tileCounter, tileColor)
         tileCounter++;
       }
     }
     testMatrix.makeTranslation(0, 0, TILE_BASE)
 
-    // Make some cubes! For testing!
-/*     let box = new THREE.BoxGeometry(1, 1, 1);
+    // Uncomment this to put a test cube in the scene!
+    /*let box = new THREE.BoxGeometry(1, 1, 1);
     const cube = new THREE.Mesh(box, m);
     scene.add(cube)
     cube.position.x = 5
     cube.position.y = 5
     cube.position.z = 5
     console.log(cube.matrix) */
-    // Add some lights
+
+    // Add some lights!
     const light = new THREE.DirectionalLight(0xffffff, 1)
-    const ambientLight = new THREE.AmbientLight( 0xffffff, .5)
+    const ambientLight = new THREE.AmbientLight(0xffffff, .5)
+
     // Move the light out to a better position
-    light.position.x = 0;
-    light.position.y = 0;
+    light.position.x = 5;
+    light.position.y = 5;
     light.position.z = 10;
     scene.add(light);
     scene.add(ambientLight)
@@ -123,8 +128,42 @@ export default function GameWindow() {
     camera.position.z = 20;
     camera.position.y = 0;
     camera.position.x = 0;
+    camera.lookAt(0, 0, 0)
+
+    // Set up a raycaster
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    const onMouseMove = (event) => {
+      //calculate mouse position
+      if(event.button) {
+        console.log(event.button)
+      }
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+      setMouse([mouse.x, mouse.y, event.clientY, window.innerHeight])
+    }
+    window.addEventListener('mousemove', onMouseMove, false);
+
+    const color = new THREE.Color("green");
+    let currentlySelectedTile;
     let animate = function () {
       requestAnimationFrame(animate);
+      raycaster.setFromCamera(mouse, camera)
+      const tileIntersections = raycaster.intersectObject(tiles);
+      if (tileIntersections.length > 0) {
+        const instanceId = tileIntersections[0].instanceId;
+        if (currentlySelectedTile !== instanceId) {
+          tiles.setColorAt(currentlySelectedTile, tileColor);
+          currentlySelectedTile = instanceId;
+        }
+        console.log(`intersected tile ${instanceId}`)
+        tiles.setColorAt(instanceId, color)
+        tiles.instanceColor.needsUpdate = true;
+      } else if (currentlySelectedTile >= 0) {
+        tiles.setColorAt(currentlySelectedTile, tileColor);
+        tiles.instanceColor.needsUpdate = true;
+        currentlySelectedTile = -1;
+      }
       renderer.render(scene, camera);
     };
     animate();
@@ -182,9 +221,11 @@ export default function GameWindow() {
 
   return (
     <div className="game-window">
-      <p>Game window</p>
-      {/* Assign the renderCanvas ref to this canvas element! */}
+      <div id="info">
+        Info: {mouseData && mouseData.join(', ')}
+      </div>
       <canvas ref={renderCanvas} />
+      {/* Assign the renderCanvas ref to this canvas element! */}
       <p>{gameState && JSON.stringify(gameState)}</p>
       <button onClick={() => makeHexTile()}>{buttonResult}</button>
     </div>
