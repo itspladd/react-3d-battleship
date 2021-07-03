@@ -1,5 +1,5 @@
 /**********************************
- * CONSTANTS FOR HEX TILE DIMENSIONS
+ * CONSTANTS FOR HEX TILE GEOMETRY
  */
 
 // Distance from tile center to a given vertex
@@ -21,7 +21,8 @@ const TILE_THICKNESS = 0.25;
 // (i.e. the back of the tile is at z = 0)
 const TILE_BASE = TILE_THICKNESS / 2;
 
-const TILES = {
+// Bundled object for export
+const TILE_GEOMETRY = {
   TILE_RADIUS,
   TILE_HEIGHT,
   TILE_THICKNESS,
@@ -30,6 +31,21 @@ const TILES = {
 }
 /**********************************/
 
+/**********************************
+ * CONSTANTS FOR MATERIALS
+ */
+
+const TILE_MATERIAL = {
+  color: 0xffffff, // If the base color is white, we can apply any other color easily!
+  roughness: 0.6,
+  metalness: 0.5
+}
+
+// Bundled object for export
+const MATERIALS = {
+  TILE_MATERIAL
+}
+/**********************************/
 
 /**********************************
  * HEX VALUE CONSTANTS FOR COLORS
@@ -42,13 +58,15 @@ const TILE_HOVER_COLOR = 0x4477ff;
 // LIGHTS
 const LIGHT_BASE_COLOR = 0xffffff;
 
+// Bundled object for export
 const COLORS = {
   TILE_BASE_COLOR,
   TILE_HOVER_COLOR
 }
-
+/**********************************/
 
 module.exports = {
-  TILES,
+  TILE_GEOMETRY,
+  MATERIALS,
   COLORS
 }

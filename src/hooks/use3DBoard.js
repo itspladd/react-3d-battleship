@@ -6,17 +6,23 @@ import { MapControls } from 'three/examples/jsm/controls/OrbitControls'
 import { boardCoordinatesToSceneCoordinates } from '../helpers/boardHelpers'
 
 // Constants
-import { TILES, COLORS } from '../constants/3DBOARD'
+import { TILE_GEOMETRY, MATERIALS, COLORS } from '../constants/3DBOARD';
 
 export default function use3DBoard(canvasRef, gameState) {
   const [renderer, setRenderer] = useState();
   const [mouseData, setMouse] = useState([]);
 
-  const { TILE_RADIUS, TILE_HEIGHT, TILE_THICKNESS, TILE_BASE } = TILES;
+  const { TILE_RADIUS, TILE_HEIGHT, TILE_THICKNESS, TILE_BASE } = TILE_GEOMETRY;
 
   // Set up colors
   const tileBaseColor = new THREE.Color(COLORS.TILE_BASE_COLOR);
   const tileHoverColor = new THREE.Color(COLORS.TILE_HOVER_COLOR);
+
+  // Set up materials
+  // Make the material for all tiles
+  let tileMaterial = new THREE.MeshStandardMaterial({
+    ...MATERIALS.TILE_MATERIAL
+  });
 
   useEffect(() => {
     const BOARD_ROWS = gameState.players.p1.board.rows;
@@ -42,15 +48,10 @@ export default function use3DBoard(canvasRef, gameState) {
     const hexGeometry = new THREE.CylinderBufferGeometry(TILE_RADIUS * .95, TILE_RADIUS, TILE_THICKNESS, 6);
     hexGeometry.rotateX(Math.PI * 0.5) // Turn the tile so it's laying "flat"
     hexGeometry.rotateZ(Math.PI * 0.5) // Turn the tile to "point" sideways
-    // Make the material for all tiles
-    let m = new THREE.MeshStandardMaterial({
-      color: 0xffffff, // If the base color is white, we can apply any other color easily!
-      roughness: 0.6,
-      metalness: 0.5
-    });
+
   
     // Create the instanced mesh for all tiles
-    let tiles = new THREE.InstancedMesh(hexGeometry, m, TOTAL_TILES);
+    let tiles = new THREE.InstancedMesh(hexGeometry, tileMaterial, TOTAL_TILES);
     scene.add(tiles);
   
     // Create the base position matrix for the board tiles
