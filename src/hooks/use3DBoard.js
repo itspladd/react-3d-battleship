@@ -4,27 +4,17 @@ import { MapControls } from 'three/examples/jsm/controls/OrbitControls'
 
 // Helpers
 import { boardCoordinatesToSceneCoordinates } from '../helpers/boardHelpers'
-import { EdgesGeometry } from 'three';
+
+// Constants
+import { TILES } from '../constants/3DBOARD'
 
 export default function use3DBoard(canvasRef, gameState) {
   const [renderer, setRenderer] = useState();
   const [mouseData, setMouse] = useState([]);
 
-  useEffect(() => {
+  const { TILE_RADIUS, TILE_HEIGHT, TILE_THICKNESS, TILE_BASE } = TILES;
 
-    // IMPORTANT CONSTANTS FOR SETTING UP THE HEX TILES
-    // Distance from tile center to a given vertex
-    const TILE_RADIUS = 1.0;
-    // Distance from tile center to center of a given side
-    // calculation: R * sin(60 deg. or 2pi/6 rad.)
-    const TILE_HEIGHT = TILE_RADIUS * Math.sin(Math.PI / 3);
-    // Length of a single tile side
-    // Equal to HEX_RADIUS since this is a regular hexagon.
-    const TILE_SIDE = TILE_RADIUS;
-    const TILE_THICKNESS = 0.25;
-    // The height of the center of a tile to get it to lay "flat" on the XY plane
-    // (i.e. the back of the tile is at z = 0)
-    const TILE_BASE = TILE_THICKNESS / 2;
+  useEffect(() => {
     const BOARD_ROWS = gameState.players.p1.board.rows;
     const BOARD_COLS = gameState.players.p1.board.columns;
     const TOTAL_TILES = BOARD_ROWS * BOARD_COLS;
