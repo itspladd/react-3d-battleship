@@ -71,11 +71,11 @@ export default function GameWindow() {
     hexGeometry.rotateZ(Math.PI * 0.5) // Turn the tile to "point" sideways
     // Make the material for all tiles
     let m = new THREE.MeshStandardMaterial({
-      color: 0x0066ff,
+      color: 0xffffff, // If the base color is white, we can apply any other color easily!
       roughness: 0.6,
       metalness: 0.5
     });
-    let tileColor = new THREE.Color('white')
+    let tileColor = new THREE.Color(0x0066ff)
 
     // Create the instanced mesh for all tiles
     let tiles = new THREE.InstancedMesh(hexGeometry, m, TOTAL_TILES);
@@ -144,7 +144,7 @@ export default function GameWindow() {
     }
     window.addEventListener('mousemove', onMouseMove, false);
 
-    const color = new THREE.Color("green");
+    const hoverColor = new THREE.Color(0x4477ff);
     let currentlySelectedTile;
     let animate = function () {
       requestAnimationFrame(animate);
@@ -157,7 +157,7 @@ export default function GameWindow() {
           currentlySelectedTile = instanceId;
         }
         console.log(`intersected tile ${instanceId}`)
-        tiles.setColorAt(instanceId, color)
+        tiles.setColorAt(instanceId, hoverColor)
         tiles.instanceColor.needsUpdate = true;
       } else if (currentlySelectedTile >= 0) {
         tiles.setColorAt(currentlySelectedTile, tileColor);
