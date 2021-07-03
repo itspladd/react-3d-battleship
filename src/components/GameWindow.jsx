@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import * as THREE from 'three';
-import { MapControls } from 'three/examples/jsm/controls/OrbitControls'
+
 import '../styles/GameWindow.css'
 
 // Hooks
@@ -10,9 +9,9 @@ import useGameEngine from '../hooks/useGameEngine'
 import { boardCoordinatesToSceneCoordinates } from '../helpers/boardHelpers'
 import { EdgesGeometry } from 'three';
 
-
-
+// Component
 export default function GameWindow() {
+
   // This ref will hold the DOM <canvas> element where we render the game.
   const renderCanvas = useRef(null);
 
@@ -22,7 +21,7 @@ export default function GameWindow() {
     { id: 'p2', name: 'Tautrion' }
   ];
 
-  const [engine, moves, gameState, setGameState] = useGameEngine();
+  const [engine, moves, gameState, setGameState] = useGameEngine(players);
   const [renderer, setRenderer] = useState();
   const [mouseData, setMouse] = useState([]);
   let buttonResult = "Click me";

@@ -1,7 +1,7 @@
+import { useState } from 'react'
+
 // Engine
 const { GameEngine, CONSTANTS } = require('@itspladd/battleship-engine')
-
-const { useState } = require("react");
 
 export default function useGameEngine(players) {
   const [engine, setEngine] = useState(new GameEngine(players));
