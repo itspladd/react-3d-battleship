@@ -8,9 +8,11 @@
 #info {
   position: absolute;
   top: 10px;
-  width: 100%;
-  text-align: center;
+  left: 10px;
+  width: 20%;
+  height: 100%;
   z-index: 100;
   display: block;
-  background-color:white;
+  background-color: #333333;
+  color: #dddddd
 }

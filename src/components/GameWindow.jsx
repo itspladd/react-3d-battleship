@@ -38,15 +38,32 @@ export default function GameWindow() {
       .then(results => setGameState(results.gameState))
   }
 
+  const shipList = [];
+  Object.values(gameState.players).forEach(player => {
+    const playerShips = [];
+    Object.values(player.board.ships).forEach(ship => {
+      playerShips.push(<li>{ship.id}: {ship.segments[1].position}</li>)
+    })
+    shipList.push(
+      <ul>
+        <li>Player: {player.id}</li>
+        <ul>{playerShips}</ul>
+      </ul>
+      )
+  })
+
   return (
     <div className="game-window">
       <div id="info">
+        <h2>Debug panel</h2>
         <span>
           Info: {mouseData && mouseData.join(', ')}
         </span>
         <p>
           <button onClick={() => handleClick()}>Place a ship</button>
-          <p>{gameState && JSON.stringify(gameState.players.p1.board.ships)}</p>
+          <p>
+            {shipList}
+          </p>
         </p>
       </div>
       <canvas ref={renderCanvas} />
