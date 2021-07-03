@@ -6,13 +6,17 @@ import { MapControls } from 'three/examples/jsm/controls/OrbitControls'
 import { boardCoordinatesToSceneCoordinates } from '../helpers/boardHelpers'
 
 // Constants
-import { TILES } from '../constants/3DBOARD'
+import { TILES, COLORS } from '../constants/3DBOARD'
 
 export default function use3DBoard(canvasRef, gameState) {
   const [renderer, setRenderer] = useState();
   const [mouseData, setMouse] = useState([]);
 
   const { TILE_RADIUS, TILE_HEIGHT, TILE_THICKNESS, TILE_BASE } = TILES;
+
+  // Set up colors
+  const tileBaseColor = new THREE.Color(COLORS.TILE_BASE_COLOR);
+  const tileHoverColor = new THREE.Color(COLORS.TILE_HOVER_COLOR);
 
   useEffect(() => {
     const BOARD_ROWS = gameState.players.p1.board.rows;
@@ -26,7 +30,7 @@ export default function use3DBoard(canvasRef, gameState) {
     let controls = new MapControls(camera, canvasRef.current)
     controls.screenSpacePanning = true;
   
-    // Uncomment this to put angle limist on the camera.
+    // Uncomment this to put angle limits on the camera.
     /* controls.maxAzimuthAngle = 0;
     controls.minAzimuthAngle = 0;
     controls.maxPolarAngle = Math.PI * .8;
@@ -44,7 +48,6 @@ export default function use3DBoard(canvasRef, gameState) {
       roughness: 0.6,
       metalness: 0.5
     });
-    let tileColor = new THREE.Color(0x0066ff)
   
     // Create the instanced mesh for all tiles
     let tiles = new THREE.InstancedMesh(hexGeometry, m, TOTAL_TILES);
@@ -65,7 +68,7 @@ export default function use3DBoard(canvasRef, gameState) {
         const [x, y] = boardCoordinatesToSceneCoordinates(params);
         testMatrix.makeTranslation(x, y, TILE_BASE);
         tiles.setMatrixAt(tileCounter, testMatrix);
-        tiles.setColorAt(tileCounter, tileColor)
+        tiles.setColorAt(tileCounter, tileBaseColor)
         tileCounter++;
       }
     }
@@ -101,7 +104,7 @@ export default function use3DBoard(canvasRef, gameState) {
   
     // Set up a raycaster
     const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
+    const mouse = new THREE.Vector2(-1, -1);
     const onMouseMove = (event) => {
       //calculate mouse position
       if(event.button) {
@@ -113,7 +116,6 @@ export default function use3DBoard(canvasRef, gameState) {
     }
     window.addEventListener('mousemove', onMouseMove, false);
   
-    const hoverColor = new THREE.Color(0x4477ff);
     let currentlySelectedTile;
     let animate = function () {
       requestAnimationFrame(animate);
@@ -122,14 +124,14 @@ export default function use3DBoard(canvasRef, gameState) {
       if (tileIntersections.length > 0) {
         const instanceId = tileIntersections[0].instanceId;
         if (currentlySelectedTile !== instanceId) {
-          tiles.setColorAt(currentlySelectedTile, tileColor);
+          tiles.setColorAt(currentlySelectedTile, tileBaseColor);
           currentlySelectedTile = instanceId;
         }
         console.log(`intersected tile ${instanceId}`)
-        tiles.setColorAt(instanceId, hoverColor)
+        tiles.setColorAt(instanceId, tileHoverColor)
         tiles.instanceColor.needsUpdate = true;
       } else if (currentlySelectedTile >= 0) {
-        tiles.setColorAt(currentlySelectedTile, tileColor);
+        tiles.setColorAt(currentlySelectedTile, tileBaseColor);
         tiles.instanceColor.needsUpdate = true;
         currentlySelectedTile = -1;
       }

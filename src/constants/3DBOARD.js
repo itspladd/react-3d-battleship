@@ -28,7 +28,27 @@ const TILES = {
   TILE_SIDE,
   TILE_BASE
 }
+/**********************************/
+
+
+/**********************************
+ * HEX VALUE CONSTANTS FOR COLORS
+ */
+
+// TILES
+const TILE_BASE_COLOR = 0x0066ff;
+const TILE_HOVER_COLOR = 0x4477ff;
+
+// LIGHTS
+const LIGHT_BASE_COLOR = 0xffffff;
+
+const COLORS = {
+  TILE_BASE_COLOR,
+  TILE_HOVER_COLOR
+}
+
 
 module.exports = {
-  TILES
+  TILES,
+  COLORS
 }
