@@ -1,11 +1,11 @@
 /**********************************
  * CONSTANTS FOR BOARD DIMENSIONS
  */
-const ROWS_TOP = 5;
-const ROWS_BOTTOM = 5;
-const COLUMNS_LEFT = 5;
-const COLUMNS_RIGHT = 5;
-const COLUMNS_BETWEEN = 1;
+const ROWS_TOP = 4;
+const ROWS_BOTTOM = 4;
+const COLUMNS_LEFT = 4;
+const COLUMNS_RIGHT = 4;
+const COLUMNS_BETWEEN = 2;
 
 const BOARD_DIMENSIONS = {
   ROWS_TOP,

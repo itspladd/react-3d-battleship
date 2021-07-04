@@ -28,6 +28,19 @@ let tileMaterial = new THREE.MeshStandardMaterial({
   ...MATERIALS.TILE_MATERIAL
 });
 
+// Check all player boards to see if a tile is inside the boundaries of that board.
+const tilePlayerId = (boundaries, tilePos) => {
+  for (let boundaryObj of boundaries) {
+    const { id, startX, startY, endX, endY } = boundaryObj;
+    const [x, y] = tilePos;
+    if (x >= startX && x <= endX && y >= startY && y <= endY) {
+      return id;
+    }
+  }
+
+  return null;
+}
+
 export default function use3DBoard(canvasRef, gameState) {
   const [renderer, setRenderer] = useState();
   const [mouseData, setMouse] = useState([]);
@@ -158,9 +171,33 @@ const determineTotalTiles = gameState => {
   return {totalRows, totalCols}
 }
 
+const determinePlayerBoardBoundaries = gameState => {
+  // Assumes that all boards are placed horizontally next to each other.
+  const playersArr = Object.values(gameState.players);
+  const playerBoundaries = [];
+  let currentX = COLUMNS_LEFT - 1; // Offset by 1 to account for 0-index
+  for (let i = 0; i < playersArr.length; i++) {
+    const currentPlayer = playersArr[i];
+    const id = currentPlayer.id;
+
+    // Move right 1 from where we stopped last. Add spacer columns between boards.
+    const startX = 1 + currentX + COLUMNS_BETWEEN * i;
+    const startY = ROWS_TOP;
+
+    // Since startX and startY are on the first row/column, subtract 1 to account.
+    const endX = startX + currentPlayer.board.columns - 1;
+    const endY = startY + currentPlayer.board.rows - 1;
+    currentX = endX;
+    playerBoundaries.push({ id, startX, startY, endX, endY })
+  }
+
+  return playerBoundaries;
+}
+
 const makeBoard = (tiles, gameState) => {
   // Dependent on determineTotalTiles() to get the right number of tiles.
-
+  const playerBoundaries = determinePlayerBoardBoundaries(gameState);
+  console.log(playerBoundaries)
   const {totalRows, totalCols} = tiles;
 
   // Create a property to hold game data about each tile
@@ -182,10 +219,14 @@ const makeBoard = (tiles, gameState) => {
         tileRadius: TILE_RADIUS,
         tileHeight: TILE_HEIGHT
       }
+      // Find the 3D space positioning for this coordinate and apply it to this tile.
       const [x, y] = boardCoordinatesToSceneCoordinates(params);
       testMatrix.makeTranslation(x, y, TILE_BASE);
       tiles.setMatrixAt(tileCounter, testMatrix);
-      tiles.setColorAt(tileCounter, tileBaseColor);
+
+      // Set tile color and attributes depending on whether it's part of a player board.
+      const playerId = tilePlayerId(playerBoundaries, [col, row]);
+      tiles.setColorAt(tileCounter, (playerId ? tileBaseColor : tileFillerColor));
       tiles.gameData[tileCounter] = {
         boardPosition: [col, row]
       }
