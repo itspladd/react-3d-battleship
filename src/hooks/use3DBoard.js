@@ -28,23 +28,12 @@ let tileMaterial = new THREE.MeshStandardMaterial({
   ...MATERIALS.TILE_MATERIAL
 });
 
-// Check all player boards to see if a tile is inside the boundaries of that board.
-const tilePlayerId = (boundaries, tilePos) => {
-  for (let boundaryObj of boundaries) {
-    const { id, startX, startY, endX, endY } = boundaryObj;
-    const [x, y] = tilePos;
-    if (x >= startX && x <= endX && y >= startY && y <= endY) {
-      return id;
-    }
-  }
 
-  return null;
-}
 
 export default function use3DBoard(canvasRef, gameState) {
   const [renderer, setRenderer] = useState();
   const [mouseData, setMouse] = useState([]);
-  const [currentTilePosition, setCurrentTilePosition] = useState([]);
+  const [currentTileData, setCurrentTileData] = useState({});
 
   useEffect(() => {
     // === THREE.JS CODE START ===
@@ -122,25 +111,42 @@ export default function use3DBoard(canvasRef, gameState) {
     }
     window.addEventListener('mousemove', onMouseMove, false);
   
-    let currentlySelectedTile = 'none';
+    let previouslyHoveredTile = 'none';
     let animate = function () {
       requestAnimationFrame(animate);
       raycaster.setFromCamera(mouse, camera)
       const tileIntersections = raycaster.intersectObject(tiles);
+
+      // If we're hovering over any tiles...
       if (tileIntersections.length > 0) {
-        const instanceId = tileIntersections[0].instanceId;
-        if (currentlySelectedTile !== instanceId) {
-          tiles.setColorAt(currentlySelectedTile, tileBaseColor);
-          currentlySelectedTile = instanceId;
+
+        // Save the ID of the tile
+        const currentlyHoveredTile = tileIntersections[0].instanceId;
+        const tileData = tiles.gameData[currentlyHoveredTile]
+        const prevTileData = tiles.gameData[previouslyHoveredTile]
+        // If we're hovering over a new tile...
+        if (previouslyHoveredTile !== currentlyHoveredTile) {
+          // Reset the color of the old tile and update.
+          prevTileData.playerId && tiles.setColorAt(previouslyHoveredTile, tileBaseColor);
+          previouslyHoveredTile = currentlyHoveredTile;
         }
-        tiles.setColorAt(instanceId, tileHoverColor)
+
+        // If the current tile is interactable...
+        if (tileData.playerId) {
+          // Set its color to the hover color.
+          tiles.setColorAt(currentlyHoveredTile, tileHoverColor)
+        }
         tiles.instanceColor.needsUpdate = true;
-      } else if (currentlySelectedTile >= 0) {
-        tiles.setColorAt(currentlySelectedTile, tileBaseColor);
+      } else if (previouslyHoveredTile !== 'none') {
+        // If we're not currently hovering over any tiles
+        // and we haven't already done so, reset colors.
+        //tiles.setColorAt(previouslyHoveredTile, tileBaseColor);
         tiles.instanceColor.needsUpdate = true;
-        currentlySelectedTile = 'none';
+
+        // And update to show that we're not hovering over any tiles.
+        previouslyHoveredTile = 'none';
       }
-      setCurrentTilePosition(tiles.gameData[currentlySelectedTile].boardPosition)
+      setCurrentTileData( { ...tiles.gameData[previouslyHoveredTile] })
       renderer.render(scene, camera);
     };
     animate();
@@ -150,7 +156,7 @@ export default function use3DBoard(canvasRef, gameState) {
   
   }, [])
 
-  return [mouseData, currentTilePosition]
+  return [mouseData, currentTileData]
 }
 
 const determineTotalTiles = gameState => {
@@ -203,7 +209,9 @@ const makeBoard = (tiles, gameState) => {
   // Create a property to hold game data about each tile
   tiles.gameData = {
     none: {
-      boardPosition: null
+      boardPosition: null,
+      relativeBoardPosition: null,
+      playerId: null
     }
   };
 
@@ -225,10 +233,23 @@ const makeBoard = (tiles, gameState) => {
       tiles.setMatrixAt(tileCounter, testMatrix);
 
       // Set tile color and attributes depending on whether it's part of a player board.
-      const playerId = tilePlayerId(playerBoundaries, [col, row]);
-      tiles.setColorAt(tileCounter, (playerId ? tileBaseColor : tileFillerColor));
+      const playerBoardData = tileBoardData(playerBoundaries, [col, row]);
+      let relativeBoardPosition = null;
+      let playerId = null
+      // If this is part of a board, set its color to the base color.
+      // Otherwise, set it to the "non-interactive" color
+      if (playerBoardData) {
+        tiles.setColorAt(tileCounter, tileBaseColor);
+        const {startX, startY} = playerBoardData;
+        playerId = playerBoardData.id
+        relativeBoardPosition = tileRelativePosition(startX, startY, col, row)
+      } else {
+        tiles.setColorAt(tileCounter, tileFillerColor);
+      }
       tiles.gameData[tileCounter] = {
-        boardPosition: [col, row]
+        boardPosition: [col, row],
+        relativeBoardPosition,
+        playerId
       }
       tileCounter++;
     }
@@ -236,4 +257,21 @@ const makeBoard = (tiles, gameState) => {
   tiles.gameData['none'] = {
     boardPosition: null
   }
+}
+
+// Check all player boards to see if a tile is inside the boundaries of that board.
+const tileBoardData = (boundaries, tilePos) => {
+  for (let boundaryObj of boundaries) {
+    const { id, startX, startY, endX, endY } = boundaryObj;
+    const [x, y] = tilePos;
+    if (x >= startX && x <= endX && y >= startY && y <= endY) {
+      return { id, startX, startY };
+    }
+  }
+
+  return null;
+}
+
+const tileRelativePosition = (startX, startY, tileX, tileY) => {
+  return [tileX - startX, tileY - startY]
 }
