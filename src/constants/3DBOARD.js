@@ -1,4 +1,23 @@
 /**********************************
+ * CONSTANTS FOR BOARD DIMENSIONS
+ */
+const ROWS_TOP = 5;
+const ROWS_BOTTOM = 5;
+const COLUMNS_LEFT = 5;
+const COLUMNS_RIGHT = 5;
+const COLUMNS_BETWEEN = 1;
+
+const BOARD_DIMENSIONS = {
+  ROWS_TOP,
+  ROWS_BOTTOM,
+  COLUMNS_LEFT,
+  COLUMNS_RIGHT,
+  COLUMNS_BETWEEN
+}
+
+/**********************************/
+
+/**********************************
  * CONSTANTS FOR HEX TILE GEOMETRY
  */
 
@@ -69,6 +88,7 @@ const COLORS = {
 /**********************************/
 
 module.exports = {
+  BOARD_DIMENSIONS,
   TILE_GEOMETRY,
   MATERIALS,
   COLORS

@@ -6,7 +6,15 @@ import { MapControls } from 'three/examples/jsm/controls/OrbitControls'
 import { boardCoordinatesToSceneCoordinates } from '../helpers/boardHelpers'
 
 // Constants
-import { TILE_GEOMETRY, MATERIALS, COLORS } from '../constants/3DBOARD';
+import { BOARD_DIMENSIONS, TILE_GEOMETRY, MATERIALS, COLORS } from '../constants/3DBOARD';
+
+const {
+  ROWS_TOP,
+  ROWS_BOTTOM,
+  COLUMNS_LEFT,
+  COLUMNS_RIGHT,
+  COLUMNS_BETWEEN
+} = BOARD_DIMENSIONS;
 const { TILE_RADIUS, TILE_HEIGHT, TILE_THICKNESS, TILE_BASE } = TILE_GEOMETRY;
 
 // Set up colors
@@ -50,12 +58,15 @@ export default function use3DBoard(canvasRef, gameState) {
     const { totalRows, totalCols } = determineTotalTiles(gameState);
     const totalTiles = totalRows * totalCols;
     let tiles = new THREE.InstancedMesh(hexGeometry, tileMaterial, totalTiles);
+
+    // Name the mesh so it's easier to find later in the scene.
+    tiles.name = "tiles";
     // Save rows/cols with the InstancedMesh to make it easier to access them
     tiles.totalRows = totalRows;
     tiles.totalCols = totalCols;
     makeBoard(tiles, gameState);
     scene.add(tiles);
-  
+
     // Uncomment this to put a test cube in the scene!
     /*let box = new THREE.BoxGeometry(1, 1, 1);
     const cube = new THREE.Mesh(box, m);
@@ -121,6 +132,7 @@ export default function use3DBoard(canvasRef, gameState) {
     };
     animate();
     setRenderer(renderer);
+    console.log(scene)
     // === THREE.JS CODE END ===
   
   }, [])
@@ -137,17 +149,12 @@ const determineTotalTiles = gameState => {
   const playerCols = playersArr.map(player => player.board.columns)
                     .reduce((a, b) => a + b);
 
-  // One spacer column between each board.
-  const spacerColsWidth = 1;
+  // Need one COLUMNS_BETWEEN between each player board.
   const spacerColsNeeded = playersArr.length - 1
-  const spacerColsTotal = spacerColsWidth * spacerColsNeeded
-  // 5 columns on each side beside the boards.
-  // 5 rows on top and on bottom.
-  const fillerCols = 10;
-  const fillerRows = 10;
+  const spacerColsTotal = COLUMNS_BETWEEN * spacerColsNeeded
 
-  const totalRows = playerRows + fillerRows;
-  const totalCols = playerCols + spacerColsTotal + fillerCols
+  const totalRows = playerRows + ROWS_TOP + ROWS_BOTTOM;
+  const totalCols = playerCols + spacerColsTotal + COLUMNS_LEFT + COLUMNS_RIGHT;
   return {totalRows, totalCols}
 }
 
