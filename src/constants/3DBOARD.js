@@ -54,6 +54,7 @@ const MATERIALS = {
 // TILES
 const TILE_BASE_COLOR = 0x0066ff;
 const TILE_HOVER_COLOR = 0x4477ff;
+const TILE_NONINTERACTIVE_COLOR = 0x0055ee;
 
 // LIGHTS
 const LIGHT_BASE_COLOR = 0xffffff;
@@ -61,7 +62,9 @@ const LIGHT_BASE_COLOR = 0xffffff;
 // Bundled object for export
 const COLORS = {
   TILE_BASE_COLOR,
-  TILE_HOVER_COLOR
+  TILE_HOVER_COLOR,
+  TILE_NONINTERACTIVE_COLOR,
+  LIGHT_BASE_COLOR
 }
 /**********************************/
 

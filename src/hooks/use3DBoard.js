@@ -7,77 +7,54 @@ import { boardCoordinatesToSceneCoordinates } from '../helpers/boardHelpers'
 
 // Constants
 import { TILE_GEOMETRY, MATERIALS, COLORS } from '../constants/3DBOARD';
+const { TILE_RADIUS, TILE_HEIGHT, TILE_THICKNESS, TILE_BASE } = TILE_GEOMETRY;
+
+// Set up colors
+const tileBaseColor = new THREE.Color(COLORS.TILE_BASE_COLOR);
+const tileHoverColor = new THREE.Color(COLORS.TILE_HOVER_COLOR);
+const tileFillerColor = new THREE.Color(COLORS.TILE_NONINTERACTIVE_COLOR)
+
+// Set up materials
+// Make the material for all tiles
+let tileMaterial = new THREE.MeshStandardMaterial({
+  ...MATERIALS.TILE_MATERIAL
+});
 
 export default function use3DBoard(canvasRef, gameState) {
   const [renderer, setRenderer] = useState();
   const [mouseData, setMouse] = useState([]);
   const [currentTilePosition, setCurrentTilePosition] = useState([]);
 
-  const { TILE_RADIUS, TILE_HEIGHT, TILE_THICKNESS, TILE_BASE } = TILE_GEOMETRY;
-
   useEffect(() => {
-    // Set up colors
-    const tileBaseColor = new THREE.Color(COLORS.TILE_BASE_COLOR);
-    const tileHoverColor = new THREE.Color(COLORS.TILE_HOVER_COLOR);
-
-    // Set up materials
-    // Make the material for all tiles
-    let tileMaterial = new THREE.MeshStandardMaterial({
-      ...MATERIALS.TILE_MATERIAL
-    });
-
-    const BOARD_ROWS = gameState.players.p1.board.rows;
-    const BOARD_COLS = gameState.players.p1.board.columns;
-    const TOTAL_TILES = BOARD_ROWS * BOARD_COLS;
-  
     // === THREE.JS CODE START ===
     let scene = new THREE.Scene();
     let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     let renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current });
     let controls = new MapControls(camera, canvasRef.current)
     controls.screenSpacePanning = true;
-  
+
     // Uncomment this to put angle limits on the camera.
     controls.maxAzimuthAngle = 0;
     controls.minAzimuthAngle = 0;
     controls.maxPolarAngle = Math.PI * .8;
     controls.minPolarAngle = Math.PI / 2;
-  
+
     renderer.setSize(window.innerWidth, window.innerHeight);
-  
+
     // Make and orient the basic hex geometry for all tiles
     const hexGeometry = new THREE.CylinderBufferGeometry(TILE_RADIUS * .95, TILE_RADIUS, TILE_THICKNESS, 6);
     hexGeometry.rotateX(Math.PI * 0.5) // Turn the tile so it's laying "flat"
     hexGeometry.rotateZ(Math.PI * 0.5) // Turn the tile to "point" sideways
 
-  
     // Create the instanced mesh for all tiles
-    let tiles = new THREE.InstancedMesh(hexGeometry, tileMaterial, TOTAL_TILES);
-    // Create a positionIndex property to hold where on the board each instanceID is.
-    tiles.positionOf = {};
+    const { totalRows, totalCols } = determineTotalTiles(gameState);
+    const totalTiles = totalRows * totalCols;
+    let tiles = new THREE.InstancedMesh(hexGeometry, tileMaterial, totalTiles);
+    // Save rows/cols with the InstancedMesh to make it easier to access them
+    tiles.totalRows = totalRows;
+    tiles.totalCols = totalCols;
+    makeBoard(tiles, gameState);
     scene.add(tiles);
-  
-    // Create the base position matrix for the board tiles
-    const testMatrix = new THREE.Matrix4();
-    // Make a board!
-    let tileCounter = 0;
-    for (let row = 0; row < BOARD_ROWS; row++) {
-      for (let col = 0; col < BOARD_COLS; col++) {
-        const params = {
-          col,
-          row,
-          tileRadius: TILE_RADIUS,
-          tileHeight: TILE_HEIGHT
-        }
-        const [x, y] = boardCoordinatesToSceneCoordinates(params);
-        testMatrix.makeTranslation(x, y, TILE_BASE);
-        tiles.setMatrixAt(tileCounter, testMatrix);
-        tiles.setColorAt(tileCounter, tileBaseColor);
-        tiles.positionOf[tileCounter] = [col, row];
-        tileCounter++;
-      }
-    }
-    testMatrix.makeTranslation(0, 0, TILE_BASE)
   
     // Uncomment this to put a test cube in the scene!
     /*let box = new THREE.BoxGeometry(1, 1, 1);
@@ -121,7 +98,7 @@ export default function use3DBoard(canvasRef, gameState) {
     }
     window.addEventListener('mousemove', onMouseMove, false);
   
-    let currentlySelectedTile;
+    let currentlySelectedTile = 'none';
     let animate = function () {
       requestAnimationFrame(animate);
       raycaster.setFromCamera(mouse, camera)
@@ -137,9 +114,9 @@ export default function use3DBoard(canvasRef, gameState) {
       } else if (currentlySelectedTile >= 0) {
         tiles.setColorAt(currentlySelectedTile, tileBaseColor);
         tiles.instanceColor.needsUpdate = true;
-        currentlySelectedTile = -1;
+        currentlySelectedTile = 'none';
       }
-      setCurrentTilePosition(tiles.positionOf[currentlySelectedTile])
+      setCurrentTilePosition(tiles.gameData[currentlySelectedTile].boardPosition)
       renderer.render(scene, camera);
     };
     animate();
@@ -151,3 +128,64 @@ export default function use3DBoard(canvasRef, gameState) {
   return [mouseData, currentTilePosition]
 }
 
+const determineTotalTiles = gameState => {
+  const playersArr = Object.values(gameState.players);
+  // Boards are drawn horizontally next to each other, so the
+  // number of player rows is just one player's rows.
+  // Columns need to be added from all players.
+  const playerRows = playersArr[0].board.rows;
+  const playerCols = playersArr.map(player => player.board.columns)
+                    .reduce((a, b) => a + b);
+
+  // One spacer column between each board.
+  const spacerColsWidth = 1;
+  const spacerColsNeeded = playersArr.length - 1
+  const spacerColsTotal = spacerColsWidth * spacerColsNeeded
+  // 5 columns on each side beside the boards.
+  // 5 rows on top and on bottom.
+  const fillerCols = 10;
+  const fillerRows = 10;
+
+  const totalRows = playerRows + fillerRows;
+  const totalCols = playerCols + spacerColsTotal + fillerCols
+  return {totalRows, totalCols}
+}
+
+const makeBoard = (tiles, gameState) => {
+  // Dependent on determineTotalTiles() to get the right number of tiles.
+
+  const {totalRows, totalCols} = tiles;
+
+  // Create a property to hold game data about each tile
+  tiles.gameData = {
+    none: {
+      boardPosition: null
+    }
+  };
+
+  // Create the base position matrix for the board tiles
+  const testMatrix = new THREE.Matrix4();
+  // Make a board!
+  let tileCounter = 0;
+  for (let row = 0; row < totalRows; row++) {
+    for (let col = 0; col < totalCols; col++) {
+      const params = {
+        col,
+        row,
+        tileRadius: TILE_RADIUS,
+        tileHeight: TILE_HEIGHT
+      }
+      const [x, y] = boardCoordinatesToSceneCoordinates(params);
+      testMatrix.makeTranslation(x, y, TILE_BASE);
+      tiles.setMatrixAt(tileCounter, testMatrix);
+      tiles.setColorAt(tileCounter, tileBaseColor);
+      tiles.gameData[tileCounter] = {
+        boardPosition: [col, row]
+      }
+      tileCounter++;
+    }
+  }
+  tiles.gameData['none'] = {
+    boardPosition: null
+  }
+}

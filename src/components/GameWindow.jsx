@@ -10,7 +10,7 @@ import use3DBoard from '../hooks/use3DBoard'
 
 // Component
 export default function GameWindow() {
-  console.log('rendering gamewindow')
+  //console.log('rendering gamewindow')
 
   // This ref will hold the DOM <canvas> element where we render the game.
   const renderCanvas = useRef(null);
