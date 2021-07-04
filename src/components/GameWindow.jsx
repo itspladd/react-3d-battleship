@@ -10,19 +10,15 @@ import use3DBoard from '../hooks/use3DBoard'
 
 // Component
 export default function GameWindow() {
+  console.log('rendering gamewindow')
 
   // This ref will hold the DOM <canvas> element where we render the game.
   const renderCanvas = useRef(null);
 
-  // Dummy players object to hold dev data.
-  const players = [
-    { id: 'p1', name: 'Trapezius' },
-    { id: 'p2', name: 'Tautrion' }
-  ];
 
-  const [engine, moves, gameState, setGameState] = useGameEngine(players);
-  const [mouseData] = use3DBoard(renderCanvas, gameState);
-  let buttonResult = "Click me";
+
+  const [engine, moves, gameState, makeMove] = useGameEngine();
+  const [mouseData, currentTilePosition] = use3DBoard(renderCanvas, gameState);
 
   const handleClick = () => {
     console.log('handling click')
@@ -34,40 +30,40 @@ export default function GameWindow() {
       position: [0, 0],
       angle: 180
     }
-    engine.inputMove(p1Move)
-      .then(results => setGameState(results.gameState))
+    makeMove(p1Move)
+      .then(results => console.log('move done. results:', results))
   }
 
   const shipList = [];
-  Object.values(gameState.players).forEach(player => {
+  gameState.players && Object.values(gameState.players).forEach(player => {
     const playerShips = [];
     Object.values(player.board.ships).forEach(ship => {
-      playerShips.push(<li>{ship.id}: {ship.segments[1].position}</li>)
+      playerShips.push(<li key={ship.id}>{ship.id}: {ship.segments[1].position}</li>)
     })
     shipList.push(
-      <ul>
-        <li>Player: {player.id}</li>
+      <ul key={player.id}>
+        <li>{player.id}: {player.name}</li>
         <ul>{playerShips}</ul>
       </ul>
       )
   })
 
+  const mouseDataText = mouseData.map(pos => Number.parseFloat(pos).toFixed(2)).join(', ');
+  const mouseHoverText = currentTilePosition && currentTilePosition.join(', ')
   return (
     <div className="game-window">
       <div id="info">
         <h2>Debug panel</h2>
-        <span>
-          Info: {mouseData && mouseData.join(', ')}
-        </span>
-        <p>
-          <button onClick={() => handleClick()}>Place a ship</button>
-          <p>
-            {shipList}
-          </p>
-        </p>
+        <ul>
+          <li>Mouse: {mouseDataText}</li> 
+          <li>Current pos: {mouseHoverText}</li>
+        </ul>
+        <button onClick={() => handleClick()}>Place a ship</button>
+        {shipList}
+        {engine && `Engine timestamp: ${engine.timestamp}`}
       </div>
-      <canvas ref={renderCanvas} />
       {/* Assign the renderCanvas ref to this canvas element! */}
+      <canvas ref={renderCanvas} />
     </div>
   )
 }

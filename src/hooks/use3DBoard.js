@@ -11,20 +11,21 @@ import { TILE_GEOMETRY, MATERIALS, COLORS } from '../constants/3DBOARD';
 export default function use3DBoard(canvasRef, gameState) {
   const [renderer, setRenderer] = useState();
   const [mouseData, setMouse] = useState([]);
+  const [currentTilePosition, setCurrentTilePosition] = useState([]);
 
   const { TILE_RADIUS, TILE_HEIGHT, TILE_THICKNESS, TILE_BASE } = TILE_GEOMETRY;
 
-  // Set up colors
-  const tileBaseColor = new THREE.Color(COLORS.TILE_BASE_COLOR);
-  const tileHoverColor = new THREE.Color(COLORS.TILE_HOVER_COLOR);
-
-  // Set up materials
-  // Make the material for all tiles
-  let tileMaterial = new THREE.MeshStandardMaterial({
-    ...MATERIALS.TILE_MATERIAL
-  });
-
   useEffect(() => {
+    // Set up colors
+    const tileBaseColor = new THREE.Color(COLORS.TILE_BASE_COLOR);
+    const tileHoverColor = new THREE.Color(COLORS.TILE_HOVER_COLOR);
+
+    // Set up materials
+    // Make the material for all tiles
+    let tileMaterial = new THREE.MeshStandardMaterial({
+      ...MATERIALS.TILE_MATERIAL
+    });
+
     const BOARD_ROWS = gameState.players.p1.board.rows;
     const BOARD_COLS = gameState.players.p1.board.columns;
     const TOTAL_TILES = BOARD_ROWS * BOARD_COLS;
@@ -37,10 +38,10 @@ export default function use3DBoard(canvasRef, gameState) {
     controls.screenSpacePanning = true;
   
     // Uncomment this to put angle limits on the camera.
-    /* controls.maxAzimuthAngle = 0;
+    controls.maxAzimuthAngle = 0;
     controls.minAzimuthAngle = 0;
     controls.maxPolarAngle = Math.PI * .8;
-    controls.minPolarAngle = Math.PI / 2; */
+    controls.minPolarAngle = Math.PI / 2;
   
     renderer.setSize(window.innerWidth, window.innerHeight);
   
@@ -52,6 +53,8 @@ export default function use3DBoard(canvasRef, gameState) {
   
     // Create the instanced mesh for all tiles
     let tiles = new THREE.InstancedMesh(hexGeometry, tileMaterial, TOTAL_TILES);
+    // Create a positionIndex property to hold where on the board each instanceID is.
+    tiles.positionOf = {};
     scene.add(tiles);
   
     // Create the base position matrix for the board tiles
@@ -69,7 +72,8 @@ export default function use3DBoard(canvasRef, gameState) {
         const [x, y] = boardCoordinatesToSceneCoordinates(params);
         testMatrix.makeTranslation(x, y, TILE_BASE);
         tiles.setMatrixAt(tileCounter, testMatrix);
-        tiles.setColorAt(tileCounter, tileBaseColor)
+        tiles.setColorAt(tileCounter, tileBaseColor);
+        tiles.positionOf[tileCounter] = [col, row];
         tileCounter++;
       }
     }
@@ -113,7 +117,7 @@ export default function use3DBoard(canvasRef, gameState) {
       }
       mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
       mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
-      setMouse([mouse.x, mouse.y, event.clientY, window.innerHeight])
+      setMouse([mouse.x, mouse.y])
     }
     window.addEventListener('mousemove', onMouseMove, false);
   
@@ -128,7 +132,6 @@ export default function use3DBoard(canvasRef, gameState) {
           tiles.setColorAt(currentlySelectedTile, tileBaseColor);
           currentlySelectedTile = instanceId;
         }
-        console.log(`intersected tile ${instanceId}`)
         tiles.setColorAt(instanceId, tileHoverColor)
         tiles.instanceColor.needsUpdate = true;
       } else if (currentlySelectedTile >= 0) {
@@ -136,6 +139,7 @@ export default function use3DBoard(canvasRef, gameState) {
         tiles.instanceColor.needsUpdate = true;
         currentlySelectedTile = -1;
       }
+      setCurrentTilePosition(tiles.positionOf[currentlySelectedTile])
       renderer.render(scene, camera);
     };
     animate();
@@ -144,6 +148,6 @@ export default function use3DBoard(canvasRef, gameState) {
   
   }, [])
 
-  return [mouseData]
+  return [mouseData, currentTilePosition]
 }
 
