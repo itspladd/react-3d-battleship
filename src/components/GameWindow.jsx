@@ -18,7 +18,7 @@ export default function GameWindow() {
 
 
   const [engine, moves, gameState, makeMove] = useGameEngine();
-  const [interactionData] = use3DBoard(renderCanvas, gameState);
+  const {interactionData, messageData} = use3DBoard(renderCanvas, gameState);
 
   const handleClick = () => {
     console.log('handling click')
@@ -58,6 +58,7 @@ export default function GameWindow() {
     <div className="game-window">
       <div id="info">
         <h2>Debug panel</h2>
+        <p>Board update: {` ${messageData.current.update}, ${messageData.current.timestamp}`}</p>
         <ul>
           <li>Mouse: {mouseDataText}</li> 
         </ul>
@@ -66,6 +67,7 @@ export default function GameWindow() {
           {currentTileInfo}
         </ul>
         <button onClick={() => handleClick()}>Place a ship</button>
+        <button onClick={() => messageData.current.update = true}>Tell board to update</button>
         {shipList}
         {engine && `Engine timestamp: ${engine.timestamp}`}
       </div>

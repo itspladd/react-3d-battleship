@@ -1,4 +1,4 @@
-import { useEffect, useImperativeHandle, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three';
 import { MapControls } from 'three/examples/jsm/controls/OrbitControls'
 
@@ -45,7 +45,8 @@ export default function use3DBoard(canvasRef, gameState) {
       hoverable: null
     }
   });
-
+  const messageData = useRef({ update: false, timestamp: Date.now() });
+  console.log('refreshing?')
   useEffect(() => {
     // === THREE.JS CODE START ===
     let scene = new THREE.Scene();
@@ -134,12 +135,20 @@ export default function use3DBoard(canvasRef, gameState) {
     window.addEventListener('mousemove', onMouseMove, false);
 
     let previousHoverId = 'none';
+
     let animate = function () {
       requestAnimationFrame(animate);
       raycaster.setFromCamera(mouse, camera)
       const currentHover = handleTileHover(raycaster, tiles, previousHoverId);
-      setInteractionData(prev => ({ ...prev, currentHover}));
+      if (currentHover.instanceId !== previousHoverId) {
+        setInteractionData(prev => ({ ...prev, currentHover}));
+      }
       previousHoverId = currentHover.instanceId
+      // Update board if necessary
+      if (messageData.current.update) {
+        updateBoard();
+        messageData.current.update = false;
+      }
       renderer.render(scene, camera);
     };
     animate();
@@ -148,7 +157,12 @@ export default function use3DBoard(canvasRef, gameState) {
   
   }, [])
 
-  return [interactionData]
+  return {interactionData, messageData}
+}
+
+const updateBoard = () => {
+  console.log('updated')
+  return true;
 }
 
 const handleTileHover = (raycaster, tiles, prevTileId) => {
