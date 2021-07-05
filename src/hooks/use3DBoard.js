@@ -118,12 +118,13 @@ export default function use3DBoard(canvasRef, gameState) {
       const tileIntersections = raycaster.intersectObject(tiles);
 
       // If we're hovering over any tiles...
+      let prevTileData = tiles.gameData[previouslyHoveredTile];
       if (tileIntersections.length > 0) {
 
         // Save the ID of the tile
         const currentlyHoveredTile = tileIntersections[0].instanceId;
         const tileData = tiles.gameData[currentlyHoveredTile]
-        const prevTileData = tiles.gameData[previouslyHoveredTile]
+        prevTileData = tiles.gameData[previouslyHoveredTile]
         // If we're hovering over a new tile...
         if (previouslyHoveredTile !== currentlyHoveredTile) {
           // Reset the color of the old tile and update.
@@ -139,8 +140,8 @@ export default function use3DBoard(canvasRef, gameState) {
         tiles.instanceColor.needsUpdate = true;
       } else if (previouslyHoveredTile !== 'none') {
         // If we're not currently hovering over any tiles
-        // and we haven't already done so, reset colors.
-        //tiles.setColorAt(previouslyHoveredTile, tileBaseColor);
+        // but we still have a tile saved, reset its color if applicable.
+        prevTileData.playerId && tiles.setColorAt(previouslyHoveredTile, tileBaseColor);
         tiles.instanceColor.needsUpdate = true;
 
         // And update to show that we're not hovering over any tiles.
