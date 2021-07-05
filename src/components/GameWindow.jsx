@@ -17,8 +17,8 @@ export default function GameWindow() {
 
 
 
-  const [engine, moves, gameState, makeMove] = useGameEngine();
-  const {interactionData, messageData} = use3DBoard(renderCanvas, gameState);
+  const [engine, moves, gameStateRef, makeMove] = useGameEngine();
+  const [interactionData, messageData] = use3DBoard(renderCanvas, gameStateRef);
 
   const handleClick = () => {
     console.log('handling click')
@@ -35,7 +35,7 @@ export default function GameWindow() {
   }
 
   const shipList = [];
-  gameState.players && Object.values(gameState.players).forEach(player => {
+  gameStateRef.current.players && Object.values(gameStateRef.current.players).forEach(player => {
     const playerShips = [];
     Object.values(player.board.ships).forEach(ship => {
       playerShips.push(<li key={ship.id}>{ship.id}: {ship.segments[1].position}</li>)

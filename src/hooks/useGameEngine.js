@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 // Engine
 const { GameEngine, CONSTANTS } = require('@itspladd/battleship-engine')
@@ -13,7 +13,7 @@ export default function useGameEngine() {
   newEngine.timestamp = Date.now();
   const [engine, setEngine] = useState(newEngine);
   const [moves, setMoves] = useState({});
-  const [gameState, setGameState] = useState(engine.gameState);
+  const gameStateRef = useRef(engine.gameState);
 
   useEffect(() => {
     setMoves(CONSTANTS.RULES.DEFAULT_RULES.MOVES)
@@ -23,9 +23,9 @@ export default function useGameEngine() {
   const makeMove = async (move) => {
     console.log('making a move: ', move)
     const results = await engine.inputMove(move);
-    setGameState(results.gameState)
+    gameStateRef.current = results.gameState
     return results.valid;
   }
 
-  return [engine, moves, gameState, makeMove]
+  return [engine, moves, gameStateRef, makeMove]
 }

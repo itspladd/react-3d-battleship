@@ -30,8 +30,7 @@ let tileMaterial = new THREE.MeshStandardMaterial({
 
 
 
-export default function use3DBoard(canvasRef, gameState) {
-  const [renderer, setRenderer] = useState();
+export default function use3DBoard(canvasRef, gameStateRef) {
   const [interactionData, setInteractionData] = useState({
     pointer: {
       normalizedPosition: [-1, -1],
@@ -47,12 +46,16 @@ export default function use3DBoard(canvasRef, gameState) {
   });
   const messageData = useRef({ update: false, timestamp: Date.now() });
   console.log('refreshing?')
+
+  // Set up the basic three.js stuff
+  let scene, camera, renderer, controls;
+
   useEffect(() => {
     // === THREE.JS CODE START ===
-    let scene = new THREE.Scene();
-    let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    let renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current });
-    let controls = new MapControls(camera, canvasRef.current)
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current });
+    controls = new MapControls(camera, canvasRef.current)
     controls.screenSpacePanning = true;
 
     // Uncomment this to put angle limits on the camera.
@@ -69,7 +72,7 @@ export default function use3DBoard(canvasRef, gameState) {
     hexGeometry.rotateZ(Math.PI * 0.5) // Turn the tile to "point" sideways
 
     // Create the instanced mesh for all tiles
-    const { totalRows, totalCols } = determineTotalTiles(gameState);
+    const { totalRows, totalCols } = determineTotalTiles(gameStateRef.current);
     const totalTiles = totalRows * totalCols;
     let tiles = new THREE.InstancedMesh(hexGeometry, tileMaterial, totalTiles);
 
@@ -80,7 +83,7 @@ export default function use3DBoard(canvasRef, gameState) {
     tiles.totalCols = totalCols;
 
     // Set up the board! This means placing and coloring all the tiles.
-    makeBoard(tiles, gameState);
+    makeBoard(tiles, gameStateRef.current);
     scene.add(tiles);
 
     // Uncomment this to put a test cube in the scene!
@@ -146,22 +149,22 @@ export default function use3DBoard(canvasRef, gameState) {
       previousHoverId = currentHover.instanceId
       // Update board if necessary
       if (messageData.current.update) {
-        updateBoard();
+        updateBoard(gameStateRef.current);
         messageData.current.update = false;
       }
       renderer.render(scene, camera);
     };
     animate();
-    setRenderer(renderer);
     // === THREE.JS CODE END ===
   
   }, [])
 
-  return {interactionData, messageData}
+  return [interactionData, messageData]
 }
 
-const updateBoard = () => {
+const updateBoard = (gameState) => {
   console.log('updated')
+  console.log(gameState.players.p1.board.ships)
   return true;
 }
 
@@ -207,6 +210,7 @@ const handleTileHover = (raycaster, tiles, prevTileId) => {
 };
 
 const determineTotalTiles = gameState => {
+  console.log(gameState)
   const playersArr = Object.values(gameState.players);
   // Boards are drawn horizontally next to each other, so the
   // number of player rows is just one player's rows.
