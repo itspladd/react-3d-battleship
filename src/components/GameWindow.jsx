@@ -18,7 +18,7 @@ export default function GameWindow() {
 
 
   const [engine, moves, gameState, makeMove] = useGameEngine();
-  const [mouseData, currentTileData] = use3DBoard(renderCanvas, gameState);
+  const [interactionData] = use3DBoard(renderCanvas, gameState);
 
   const handleClick = () => {
     console.log('handling click')
@@ -48,10 +48,11 @@ export default function GameWindow() {
       )
   })
 
+  const mouseData = interactionData.pointer.normalizedPosition;
   const mouseDataText = mouseData.map(pos => Number.parseFloat(pos).toFixed(2)).join(', ');
   const currentTileInfo = [];
-  for (let key in currentTileData) {
-    currentTileInfo.push(<li>{key}: {currentTileData[key]}</li>)
+  for (let key in interactionData.currentHover) {
+    currentTileInfo.push(<li>{key}: {JSON.stringify(interactionData.currentHover[key])}</li>)
   }
   return (
     <div className="game-window">
@@ -60,7 +61,10 @@ export default function GameWindow() {
         <ul>
           <li>Mouse: {mouseDataText}</li> 
         </ul>
-        {currentTileInfo}
+        {interactionData.currentHover.instanceId}
+        <ul>
+          {currentTileInfo}
+        </ul>
         <button onClick={() => handleClick()}>Place a ship</button>
         {shipList}
         {engine && `Engine timestamp: ${engine.timestamp}`}

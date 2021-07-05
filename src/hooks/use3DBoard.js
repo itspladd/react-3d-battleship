@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useImperativeHandle, useState } from 'react'
 import * as THREE from 'three';
 import { MapControls } from 'three/examples/jsm/controls/OrbitControls'
 
@@ -18,8 +18,8 @@ const {
 const { TILE_RADIUS, TILE_HEIGHT, TILE_THICKNESS, TILE_BASE } = TILE_GEOMETRY;
 
 // Set up colors
-const tileBaseColor = new THREE.Color(COLORS.TILE_BASE_COLOR);
-const tileHoverColor = new THREE.Color(COLORS.TILE_HOVER_COLOR);
+const boardBaseColor = new THREE.Color(COLORS.PLAYER_BOARD_TILE_BASE_COLOR);
+const boardHoverColor = new THREE.Color(COLORS.PLAYER_BOARD_TILE_HOVER_COLOR);
 const tileFillerColor = new THREE.Color(COLORS.TILE_NONINTERACTIVE_COLOR)
 
 // Set up materials
@@ -32,8 +32,19 @@ let tileMaterial = new THREE.MeshStandardMaterial({
 
 export default function use3DBoard(canvasRef, gameState) {
   const [renderer, setRenderer] = useState();
-  const [mouseData, setMouse] = useState([]);
-  const [currentTileData, setCurrentTileData] = useState({});
+  const [interactionData, setInteractionData] = useState({
+    pointer: {
+      normalizedPosition: [-1, -1],
+      rawPosition: [0, 0]
+    },
+    currentHover: {
+      instanceId: 'none', // ID to find this in the 'tiles' mesh
+      playerId: null, // ID of the owning player
+      worldPosition: null, // Position on the overall visible world
+      boardPosition: null, // Position on the owning player's board
+      hoverable: null
+    }
+  });
 
   useEffect(() => {
     // === THREE.JS CODE START ===
@@ -66,6 +77,8 @@ export default function use3DBoard(canvasRef, gameState) {
     // Save rows/cols with the InstancedMesh to make it easier to access them
     tiles.totalRows = totalRows;
     tiles.totalCols = totalCols;
+
+    // Set up the board! This means placing and coloring all the tiles.
     makeBoard(tiles, gameState);
     scene.add(tiles);
 
@@ -99,6 +112,8 @@ export default function use3DBoard(canvasRef, gameState) {
   
     // Set up a raycaster
     const raycaster = new THREE.Raycaster();
+
+    // Set up mouse
     const mouse = new THREE.Vector2(-1, -1);
     const onMouseMove = (event) => {
       //calculate mouse position
@@ -107,58 +122,75 @@ export default function use3DBoard(canvasRef, gameState) {
       }
       mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
       mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
-      setMouse([mouse.x, mouse.y])
+      const pointer = {
+        normalizedPosition: [mouse.x, mouse.y],
+        rawPosition: [event.clientX, event.clientY]
+      }
+      setInteractionData(prev => ({
+        ...prev,
+        pointer
+      }))
     }
     window.addEventListener('mousemove', onMouseMove, false);
-  
-    let previouslyHoveredTile = 'none';
+
+    let previousHoverId = 'none';
     let animate = function () {
       requestAnimationFrame(animate);
       raycaster.setFromCamera(mouse, camera)
-      const tileIntersections = raycaster.intersectObject(tiles);
-
-      // If we're hovering over any tiles...
-      let prevTileData = tiles.gameData[previouslyHoveredTile];
-      if (tileIntersections.length > 0) {
-
-        // Save the ID of the tile
-        const currentlyHoveredTile = tileIntersections[0].instanceId;
-        const tileData = tiles.gameData[currentlyHoveredTile]
-        prevTileData = tiles.gameData[previouslyHoveredTile]
-        // If we're hovering over a new tile...
-        if (previouslyHoveredTile !== currentlyHoveredTile) {
-          // Reset the color of the old tile and update.
-          prevTileData.playerId && tiles.setColorAt(previouslyHoveredTile, tileBaseColor);
-          previouslyHoveredTile = currentlyHoveredTile;
-        }
-
-        // If the current tile is interactable...
-        if (tileData.playerId) {
-          // Set its color to the hover color.
-          tiles.setColorAt(currentlyHoveredTile, tileHoverColor)
-        }
-        tiles.instanceColor.needsUpdate = true;
-      } else if (previouslyHoveredTile !== 'none') {
-        // If we're not currently hovering over any tiles
-        // but we still have a tile saved, reset its color if applicable.
-        prevTileData.playerId && tiles.setColorAt(previouslyHoveredTile, tileBaseColor);
-        tiles.instanceColor.needsUpdate = true;
-
-        // And update to show that we're not hovering over any tiles.
-        previouslyHoveredTile = 'none';
-      }
-      setCurrentTileData( { ...tiles.gameData[previouslyHoveredTile] })
+      const currentHover = handleTileHover(raycaster, tiles, previousHoverId);
+      setInteractionData(prev => ({ ...prev, currentHover}));
+      previousHoverId = currentHover.instanceId
       renderer.render(scene, camera);
     };
     animate();
     setRenderer(renderer);
-    console.log(scene)
     // === THREE.JS CODE END ===
   
   }, [])
 
-  return [mouseData, currentTileData]
+  return [interactionData]
 }
+
+const handleTileHover = (raycaster, tiles, prevTileId) => {
+  // 1. Load the data for the last tile hovered over.
+  let prevTileData = tiles.gameData[prevTileId];
+  // 2. Set up conditions.
+  // Are we hovering over any tiles?
+  const tileIntersections = raycaster.intersectObject(tiles);
+  let currentlyHoveredId = 'none'
+  if (tileIntersections.length > 0) {
+    // Save the instanceID of the tile
+    currentlyHoveredId = tileIntersections[0].instanceId;
+    const currentTileData = tiles.gameData[currentlyHoveredId]
+
+    // If we're hovering over a new tile...
+    if (prevTileId !== currentlyHoveredId) {
+      // If the old tile was hoverable, reset its color.
+      const tileBaseColor = tiles.gameData[prevTileId].baseColor;
+      prevTileData.hoverable && tiles.setColorAt(prevTileId, tileBaseColor);
+    }
+
+    // If the current tile is interactable...
+    if (currentTileData.hoverable) {
+      // Set its color to the hover color.
+      const tileHoverColor = tiles.gameData[currentlyHoveredId].hoverColor;
+      tiles.setColorAt(currentlyHoveredId, tileHoverColor)
+    }
+    tiles.instanceColor.needsUpdate = true;
+  }
+  // 3. If we're not hovering over any tiles, but we were previously
+  //    hovering over a hoverable tile...
+  else if (prevTileData.hoverable) {
+    // Reset its color.
+    const tileBaseColor = tiles.gameData[prevTileId].baseColor;
+    tiles.setColorAt(prevTileId, tileBaseColor);
+    tiles.instanceColor.needsUpdate = true;
+
+    // And update to show that we're not hovering over any tiles.
+    currentlyHoveredId = 'none';
+  }
+  return( { ...tiles.gameData[currentlyHoveredId] })
+};
 
 const determineTotalTiles = gameState => {
   const playersArr = Object.values(gameState.players);
@@ -204,7 +236,6 @@ const determinePlayerBoardBoundaries = gameState => {
 const makeBoard = (tiles, gameState) => {
   // Dependent on determineTotalTiles() to get the right number of tiles.
   const playerBoundaries = determinePlayerBoardBoundaries(gameState);
-  console.log(playerBoundaries)
   const {totalRows, totalCols} = tiles;
 
   // Create a property to hold game data about each tile
@@ -212,7 +243,8 @@ const makeBoard = (tiles, gameState) => {
     none: {
       boardPosition: null,
       relativeBoardPosition: null,
-      playerId: null
+      playerId: null,
+      instanceId: 'none'
     }
   };
 
@@ -235,28 +267,35 @@ const makeBoard = (tiles, gameState) => {
 
       // Set tile color and attributes depending on whether it's part of a player board.
       const playerBoardData = tileBoardData(playerBoundaries, [col, row]);
-      let relativeBoardPosition = null;
-      let playerId = null
+      let boardPosition = null;
+      let worldPosition = [col, row]
+      let playerId = null;
+      let instanceId = tileCounter;
+      let hoverable = false;
+      let baseColor = tileFillerColor;
+      let hoverColor = null;
       // If this is part of a board, set its color to the base color.
       // Otherwise, set it to the "non-interactive" color
       if (playerBoardData) {
-        tiles.setColorAt(tileCounter, tileBaseColor);
+        baseColor = boardBaseColor;
+        hoverColor = boardHoverColor
         const {startX, startY} = playerBoardData;
-        playerId = playerBoardData.id
-        relativeBoardPosition = tileRelativePosition(startX, startY, col, row)
-      } else {
-        tiles.setColorAt(tileCounter, tileFillerColor);
+        playerId = playerBoardData.id;
+        hoverable = true;
+        boardPosition = tileRelativePosition(startX, startY, col, row)
       }
+      tiles.setColorAt(tileCounter, baseColor);
       tiles.gameData[tileCounter] = {
-        boardPosition: [col, row],
-        relativeBoardPosition,
-        playerId
+        worldPosition,
+        boardPosition,
+        playerId,
+        instanceId,
+        hoverable,
+        baseColor,
+        hoverColor
       }
       tileCounter++;
     }
-  }
-  tiles.gameData['none'] = {
-    boardPosition: null
   }
 }
 
@@ -272,6 +311,7 @@ const tileBoardData = (boundaries, tilePos) => {
 
   return null;
 }
+
 
 const tileRelativePosition = (startX, startY, tileX, tileY) => {
   return [tileX - startX, tileY - startY]
