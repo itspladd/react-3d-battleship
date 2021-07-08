@@ -35,10 +35,12 @@ export default function use3DBoard(canvasRef, gameStateRef) {
     hlp3.positionCamera(camera);
     hlp3.limitCameraMovement(controls); // Add camera movement limits
 
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    // Add axis helper
+    scene.add(hlp3.makeAxesHelpers())
+
 
     // Create an object to hold data about the 3D board space.
-    const boardData = {}
+    const gameBoard = hlp3.makeGameBoard(gameStateRef.current)
     // Set up the board! This means placing and coloring all the tiles.
     const tiles = hlp3.makeTiles(gameStateRef.current);
     const ships = hlp3.makeShips(gameStateRef.current);
@@ -52,10 +54,7 @@ export default function use3DBoard(canvasRef, gameStateRef) {
 
     //scene.add(makeTestCube()); // Puts a test cube in the scene
 
-    // Add axis helper
-    scene.add(hlp3.makeAxesHelpers())
 
-    // Set up a raycaster
 
     // Set up mouse
     const mouse = new THREE.Vector2(-1, -1);

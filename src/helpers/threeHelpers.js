@@ -22,14 +22,17 @@ let tileMaterial = new THREE.MeshStandardMaterial({
 });
 
 const setupScene = (window, canvas) => {
-  // Set up the basic three.js stuff
+  // Create basic three.js stuff
   let scene, camera, renderer, controls, raycaster;
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
   renderer = new THREE.WebGLRenderer({ canvas });
   raycaster = new THREE.Raycaster();
   controls = new MapControls(camera, canvas)
+
+  // Set up initial values
   controls.screenSpacePanning = true;
+  renderer.setSize(window.innerWidth, window.innerHeight);
 
   return [scene, camera, renderer, controls, raycaster];
 }
@@ -217,7 +220,13 @@ const makeAxesHelpers = (camera) => {
   return new THREE.AxesHelper(5);
 }
 
+const makeGameBoard = gameState => {
+  const gameBoard = { }
+  return gameBoard;
+}
+
 const hlp3 = {
+  makeGameBoard,
   setupScene,
   positionCamera,
   limitCameraMovement,
