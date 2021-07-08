@@ -3,9 +3,11 @@ import * as THREE from 'three';
 
 // Helper functions
 import { hlp3 } from '../helpers/threeHelpers'
-console.log(hlp3)
 
 export default function use3DBoard(canvasRef, gameStateRef) {
+  // DEV - REMOVE LATER
+  const playerId = 'p2';
+
   const [interactionData, setInteractionData] = useState({
     pointer: {
       normalizedPosition: [-1, -1],
@@ -40,9 +42,9 @@ export default function use3DBoard(canvasRef, gameStateRef) {
 
 
     // Create an object to hold data about the 3D board space.
-    const gameBoard = hlp3.makeGameBoard(gameStateRef.current)
+    const gameBoard = hlp3.makeGameBoard(gameStateRef.current, playerId)
     // Set up the board! This means placing and coloring all the tiles.
-    const tiles = hlp3.makeTiles(gameStateRef.current);
+    const tiles = hlp3.makeTiles(gameStateRef.current, playerId);
     const ships = hlp3.makeShips(gameStateRef.current);
     const lights = hlp3.makeLights();
     for (let light of lights) {

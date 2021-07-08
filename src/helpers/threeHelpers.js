@@ -68,7 +68,7 @@ const makeShips = (gameState) => {
   return [segment1, segment2]
 }
 
-const makeTiles = (gameState) => {
+const makeTiles = (gameState, playerId) => {
   // Make and orient the basic hex geometry for all tiles
   const hexGeometry = new THREE.CylinderBufferGeometry(TILE_RADIUS * .95, TILE_RADIUS, TILE_THICKNESS, 6);
   hexGeometry.rotateX(Math.PI * 0.5) // Turn the tile so it's laying "flat"
@@ -87,7 +87,7 @@ const makeTiles = (gameState) => {
   tiles.totalRows = totalRows;
   tiles.totalCols = totalCols;
 
-  const playerBoundaries = hlpB.determinePlayerBoardBoundaries(gameState);
+  const playerBoundaries = hlpB.determinePlayerBoardBoundaries(gameState, playerId);
 
   // Create a property to hold game data about each tile
   tiles.gameData = {
@@ -152,6 +152,15 @@ const makeTiles = (gameState) => {
   return tiles;
 }
 
+const makeGameBoard = (gameState, thisPlayerId) => {
+  const gameBoard = {
+    players: {}
+  }
+  gameBoard.tiles = makeTiles(gameState, thisPlayerId);
+  gameBoard.ships = makeShips(gameState);
+  return gameBoard;
+}
+
 const makeLights = () => {
   // Add some lights!
   const light = new THREE.DirectionalLight(0xffffff, 1)
@@ -206,6 +215,7 @@ const handleTileHover = (raycaster, tiles, prevTileId) => {
   return( { ...tiles.gameData[currentlyHoveredId] })
 };
 
+// Create a simple green cube for dev/test purposes.
 const makeTestCube = () => {
   const box = new THREE.BoxGeometry(1, 1, 1);
   const m = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
@@ -216,13 +226,9 @@ const makeTestCube = () => {
   return cube;
 }
 
-const makeAxesHelpers = (camera) => {
+// Set up the colored axes for dev purposes.
+const makeAxesHelpers = () => {
   return new THREE.AxesHelper(5);
-}
-
-const makeGameBoard = gameState => {
-  const gameBoard = { }
-  return gameBoard;
 }
 
 const hlp3 = {

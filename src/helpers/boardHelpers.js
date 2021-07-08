@@ -41,7 +41,7 @@ const boardCoordinatesToSceneCoordinates = function ({
 // Check all player boards to see if a tile is inside the boundaries of that board.
 // Return the data about that board.
 const tileBoardData = (boundaries, tilePos) => {
-  for (let boundaryObj of boundaries) {
+  for (let boundaryObj of Object.values(boundaries)) {
     const { id, startX, startY, endX, endY } = boundaryObj;
     const [x, y] = tilePos;
     if (x >= startX && x <= endX && y >= startY && y <= endY) {
@@ -56,10 +56,17 @@ const tileRelativePosition = (startX, startY, tileX, tileY) => {
   return [tileX - startX, tileY - startY]
 }
 
-const determinePlayerBoardBoundaries = gameState => {
+const determinePlayerBoardBoundaries = (gameState, firstBoardPlayerId) => {
+  // firstBoardPlayerId: the ID of the player whose board should be first.
   // Assumes that all boards are placed horizontally next to each other.
   const playersArr = Object.values(gameState.players);
-  const playerBoundaries = [];
+
+  // "Rotate" the array until the first player ID is the same as the input ID
+  while(playersArr[0].id !== firstBoardPlayerId) {
+    console.log(playersArr[0].id, firstBoardPlayerId)
+    playersArr.push(playersArr.shift());
+  }
+  const playerBoundaries = {};
   let currentX = COLUMNS_LEFT - 1; // Offset by 1 to account for 0-index
   for (let i = 0; i < playersArr.length; i++) {
     const currentPlayer = playersArr[i];
@@ -73,7 +80,7 @@ const determinePlayerBoardBoundaries = gameState => {
     const endX = startX + currentPlayer.board.columns - 1;
     const endY = startY + currentPlayer.board.rows - 1;
     currentX = endX;
-    playerBoundaries.push({ id, startX, startY, endX, endY })
+    playerBoundaries[id] = { id, startX, startY, endX, endY }
   }
 
   return playerBoundaries;
