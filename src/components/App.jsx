@@ -17,7 +17,6 @@ function App() {
 
 
   useEffect(() => {
-    console.log('Running')
     const socket = socketClient(SOCKET_DATA.SERVER)
 
     socket.on('connection', () => {
