@@ -1,5 +1,5 @@
 # react-3d-battleship
-A full-stack multiplayer Battleship clone built with React and three.js
+A full-stack multiplayer Battleship clone built with React and three.js. Uses a custom-built engine to run the game logic: https://github.com/itspladd/battleship-engine
 
 ## 🚧 Currently in development 🚧
 
