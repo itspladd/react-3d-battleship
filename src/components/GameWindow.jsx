@@ -45,11 +45,24 @@ export default function GameWindow() {
         <li>{player.id}: {player.name}</li>
         <ul>{playerShips}</ul>
       </ul>
-      )
+    )
   })
 
+  const makeString = (arr) => {
+    if(!Array.isArray(arr)) {
+      arr = Object.values(arr)
+    }
+    return arr.map(pos => Number.parseFloat(pos).toFixed(2)).join(', ');
+  }
+
   const mouseData = interactionData.pointer.normalizedPosition;
-  const mouseDataText = mouseData.map(pos => Number.parseFloat(pos).toFixed(2)).join(', ');
+  const cameraPos = interactionData.camera.position;
+  const cameraRot = interactionData.camera.rotation;
+
+  const mouseDataText = makeString(mouseData);
+  const cameraPosText = makeString(cameraPos);
+  const cameraRotText = makeString(cameraRot);
+
   const currentTileInfo = [];
   for (let key in interactionData.currentHover) {
     currentTileInfo.push(<li>{key}: {JSON.stringify(interactionData.currentHover[key])}</li>)
@@ -60,7 +73,9 @@ export default function GameWindow() {
         <h2>Debug panel</h2>
         <p>Board update: {` ${messageData.current.update}, ${messageData.current.timestamp}`}</p>
         <ul>
-          <li>Mouse: {mouseDataText}</li> 
+          <li>Mouse: {mouseDataText}</li>
+          <li>Camera pos: {cameraPosText}</li>
+          <li>Camera rot: {cameraRotText}</li>
         </ul>
         {interactionData.currentHover.instanceId}
         <ul>

@@ -6,6 +6,7 @@ import * as hlpB from '../helpers/boardHelpers'
 
 // Constants
 import { TILE_GEOMETRY, MATERIALS, COLORS } from '../constants/3DBOARD';
+const { getNeighborsInDirection } = require('@itspladd/battleship-engine').HELPERS.positionHelpers
 
 
 const { TILE_RADIUS, TILE_HEIGHT, TILE_THICKNESS, TILE_BASE } = TILE_GEOMETRY;
@@ -64,17 +65,17 @@ const makeGameBoard = (gameState, thisPlayerId) => {
   }
   gameBoard.tileAt = tileMatrix;
   gameBoard.tileAt[0][0] = 5;
-  console.log(gameBoard.tileAt)
 
   gameBoard.boundaries = hlpB.determinePlayerBoardBoundaries(gameState, thisPlayerId);
 
 
 
   gameBoard.tiles = makeTiles(gameBoard, thisPlayerId);
-  gameBoard.ships = makeShips(gameState);
+  gameBoard.ships = makeShips(gameState, thisPlayerId);
 
   gameBoard.addAllToScene = scene => {
     scene.add(gameBoard.tiles)
+    gameBoard.ships.forEach(ship => scene.add(ship))
   }
 
   return gameBoard;
@@ -151,22 +152,46 @@ const makeTiles = (gameBoard, playerId) => {
   return tiles;
 }
 
-const makeShips = (gameState) => {
+const makeShips = (gameState, thisPlayerId) => {
   // Set up some variables for ships!
   const segmentLength = TILE_HEIGHT * 2;
+  const segmentGeom = new THREE.BoxGeometry( 1, segmentLength, 1)
+  const material = new THREE.MeshBasicMaterial( {color: 0x666666} );
+  const ships = [];
+  let nullX = 4;
+  let nullY = 3;
+  const player = gameState.players[thisPlayerId]
+  console.log(player.board.ships)
+  for (let shipId in player.board.ships) {
 
+    // Set up convenience variables.
+    const shipData = player.board.ships[shipId]
+    const numSegments = shipData.segments.length
+    const nullStart = [nullX, nullY];
 
-  // Start by making just one ship!
-  const segmentGeom = new THREE.BoxGeometry( 1, TILE_HEIGHT * 2, 1)
-  const material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
-  const segment1 = new THREE.Mesh( segmentGeom, material )
-  const segment2 = new THREE.Mesh( segmentGeom, material )
-  //const segment1Pos = hlpB.boardCoordinatesToSceneCoordinates()
-  segment1.position.set(0,0,0)
-  segment2.position.set(0,2,0)
+    // Set up data about this specific ship.
+    const ship = new THREE.Group();
+    ship.name = thisPlayerId + shipId;
+    ship.nullAngle = 0;
+    ship.nullPositions = getNeighborsInDirection(nullStart, ship.nullAngle, numSegments)
 
-  setRotation(segment1, 0)
-  return [segment1, segment2]
+    //Make and add segments.
+    for(let i = 0; i < shipData.segments.length; i++) {
+      const segment = makeShipSegment(segmentGeom, material);
+      positionObject(segment, ship.nullPositions[i], ship.nullAngle);
+      ship.add(segment);
+    }
+
+    // Add ship to list.
+    ships.push(ship)
+    // Increment null location.
+    nullX++;
+  }
+  return ships;
+}
+
+const makeShipSegment = (geom, mat) => {
+  return new THREE.Mesh(geom, mat);
 }
 
 const makeLights = () => {
@@ -180,6 +205,11 @@ const makeLights = () => {
   light.position.z = 10;
 
   return [light, ambientLight];
+}
+
+const positionObject = (obj, position, rotation) => {
+  placeObjectAt(obj, position);
+  setRotation(obj, rotation);
 }
 
 const placeObjectAt = (threeObj, vector2) => {

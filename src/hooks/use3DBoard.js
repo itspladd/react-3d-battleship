@@ -13,6 +13,10 @@ export default function use3DBoard(canvasRef, gameStateRef) {
       normalizedPosition: [-1, -1],
       rawPosition: [0, 0]
     },
+    camera: {
+      position: [0, 0, 0],
+      rotation: [0, 0, 0, 0]
+    },
     currentHover: {
       instanceId: 'none', // ID to find this in the 'tiles' mesh
       playerId: null, // ID of the owning player
@@ -45,14 +49,11 @@ export default function use3DBoard(canvasRef, gameStateRef) {
     const gameBoard = hlp3.makeGameBoard(gameStateRef.current, playerId)
     // Set up the board! This means placing and coloring all the tiles.
     //const tiles = hlp3.makeTiles(gameStateRef.current, playerId);
-    const ships = hlp3.makeShips(gameStateRef.current);
     const lights = hlp3.makeLights();
     for (let light of lights) {
       scene.add(light)
     }
     gameBoard.addAllToScene(scene);
-    scene.add(ships[0])
-    scene.add(ships[1])
 
     //scene.add(makeTestCube()); // Puts a test cube in the scene
 
@@ -71,9 +72,14 @@ export default function use3DBoard(canvasRef, gameStateRef) {
         normalizedPosition: [mouse.x, mouse.y],
         rawPosition: [event.clientX, event.clientY]
       }
+      const cam = {
+        position: camera.position,
+        rotation: camera.quaternion
+      }
       setInteractionData(prev => ({
         ...prev,
-        pointer
+        pointer,
+        camera: cam
       }))
     }
     window.addEventListener('mousemove', onMouseMove, false);
