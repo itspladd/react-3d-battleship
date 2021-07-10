@@ -52,6 +52,105 @@ const limitCameraMovement = controls => {
   controls.minPolarAngle = Math.PI / 2;
 }
 
+const makeGameBoard = (gameState, thisPlayerId) => {
+  const gameBoard = {
+    players: {},
+    dimensions: hlpB.determineBoardDimensions(gameState),
+    tileData: {}
+  }
+  const tileMatrix = [];
+  for (let i = 0; i <= gameBoard.dimensions[1]; i++) {
+    tileMatrix.push([])
+  }
+  gameBoard.tileAt = tileMatrix;
+  gameBoard.tileAt[0][0] = 5;
+  console.log(gameBoard.tileAt)
+
+  gameBoard.boundaries = hlpB.determinePlayerBoardBoundaries(gameState, thisPlayerId);
+
+
+
+  gameBoard.tiles = makeTiles(gameBoard, thisPlayerId);
+  gameBoard.ships = makeShips(gameState);
+
+  gameBoard.addAllToScene = scene => {
+    scene.add(gameBoard.tiles)
+  }
+
+  return gameBoard;
+}
+
+const makeTiles = (gameBoard, playerId) => {
+  // Make and orient the basic hex geometry for all tiles
+  const hexGeometry = new THREE.CylinderBufferGeometry(TILE_RADIUS * .95, TILE_RADIUS, TILE_THICKNESS, 6);
+  hexGeometry.rotateX(Math.PI * 0.5) // Turn the tile so it's laying "flat"
+  hexGeometry.rotateZ(Math.PI * 0.5) // Turn the tile to "point" sideways
+
+  // Calculate the total number of tiles
+  const [ totalRows, totalCols ] = gameBoard.dimensions;
+  const totalTiles = totalRows * totalCols;
+
+  // Create the instanced mesh for all tiles
+  let tiles = new THREE.InstancedMesh(hexGeometry, tileMaterial, totalTiles);
+
+  // Name the mesh so it's easier to find later in the scene.
+  tiles.name = "tiles";
+  // Save rows/cols with the InstancedMesh to make it easier to access them
+  tiles.totalRows = totalRows;
+  tiles.totalCols = totalCols;
+
+  // Create a property to hold game data about each tile
+  gameBoard.tileData = {
+    none: {
+      instanceId: 'none',
+      boardPosition: null,
+      relativeBoardPosition: null,
+      playerId: null
+    }
+  };
+
+  // Make a board!
+  let tileCounter = 0;
+  for (let row = 0; row < totalRows; row++) {
+    for (let col = 0; col < totalCols; col++) {
+      // Set the transformation for this tile.
+      tiles.setMatrixAt(tileCounter, getMatrixFor([col, row]));
+
+      // Set tile color and attributes depending on whether it's part of a player board.
+
+      let worldPosition = [col, row]
+      let [playerId, startX, startY] = hlpB.tileInBoard(gameBoard.boundaries, worldPosition);
+      let boardPosition = null;
+      let instanceId = tileCounter;
+      let hoverable = false;
+      let baseColor = tileFillerColor;
+      let hoverColor = null;
+      // If this is part of a board, set its color to the base color.
+      // Otherwise, set it to the "non-interactive" color
+      if (playerId !== null) {
+        baseColor = boardBaseColor;
+        hoverColor = boardHoverColor
+        hoverable = true;
+        boardPosition = hlpB.tileRelativePosition(startX, startY, col, row)
+      }
+      tiles.setColorAt(tileCounter, baseColor);
+      gameBoard.tileData[tileCounter] = {
+        worldPosition,
+        boardPosition,
+        playerId,
+        instanceId,
+        hoverable,
+        baseColor,
+        hoverColor
+      }
+      gameBoard.tileAt[col][row] = instanceId;
+      tileCounter++;
+    }
+  }
+
+  return tiles;
+}
+
 const makeShips = (gameState) => {
   // Set up some variables for ships!
   const segmentLength = TILE_HEIGHT * 2;
@@ -65,100 +164,9 @@ const makeShips = (gameState) => {
   //const segment1Pos = hlpB.boardCoordinatesToSceneCoordinates()
   segment1.position.set(0,0,0)
   segment2.position.set(0,2,0)
+
+  setRotation(segment1, 0)
   return [segment1, segment2]
-}
-
-const makeTiles = (gameState, playerId) => {
-  // Make and orient the basic hex geometry for all tiles
-  const hexGeometry = new THREE.CylinderBufferGeometry(TILE_RADIUS * .95, TILE_RADIUS, TILE_THICKNESS, 6);
-  hexGeometry.rotateX(Math.PI * 0.5) // Turn the tile so it's laying "flat"
-  hexGeometry.rotateZ(Math.PI * 0.5) // Turn the tile to "point" sideways
-
-  // Determine the total number of tiles on the field (boards + filler)
-  const { totalRows, totalCols } = hlpB.determineTotalTiles(gameState);
-  const totalTiles = totalRows * totalCols;
-
-  // Create the instanced mesh for all tiles
-  let tiles = new THREE.InstancedMesh(hexGeometry, tileMaterial, totalTiles);
-
-  // Name the mesh so it's easier to find later in the scene.
-  tiles.name = "tiles";
-  // Save rows/cols with the InstancedMesh to make it easier to access them
-  tiles.totalRows = totalRows;
-  tiles.totalCols = totalCols;
-
-  const playerBoundaries = hlpB.determinePlayerBoardBoundaries(gameState, playerId);
-
-  // Create a property to hold game data about each tile
-  tiles.gameData = {
-    none: {
-      boardPosition: null,
-      relativeBoardPosition: null,
-      playerId: null,
-      instanceId: 'none'
-    }
-  };
-
-  // Create the base position matrix for the board tiles
-  const testMatrix = new THREE.Matrix4();
-  // Make a board!
-  let tileCounter = 0;
-  for (let row = 0; row < totalRows; row++) {
-    for (let col = 0; col < totalCols; col++) {
-      const params = {
-        col,
-        row,
-        tileRadius: TILE_RADIUS,
-        tileHeight: TILE_HEIGHT
-      }
-      // Find the 3D space positioning for this coordinate and apply it to this tile.
-      const [x, y] = hlpB.boardCoordinatesToSceneCoordinates(params);
-      testMatrix.makeTranslation(x, y, TILE_BASE);
-      tiles.setMatrixAt(tileCounter, testMatrix);
-
-      // Set tile color and attributes depending on whether it's part of a player board.
-      const playerBoardData = hlpB.tileBoardData(playerBoundaries, [col, row]);
-      let boardPosition = null;
-      let worldPosition = [col, row]
-      let playerId = null;
-      let instanceId = tileCounter;
-      let hoverable = false;
-      let baseColor = tileFillerColor;
-      let hoverColor = null;
-      // If this is part of a board, set its color to the base color.
-      // Otherwise, set it to the "non-interactive" color
-      if (playerBoardData) {
-        baseColor = boardBaseColor;
-        hoverColor = boardHoverColor
-        const {startX, startY} = playerBoardData;
-        playerId = playerBoardData.id;
-        hoverable = true;
-        boardPosition = hlpB.tileRelativePosition(startX, startY, col, row)
-      }
-      tiles.setColorAt(tileCounter, baseColor);
-      tiles.gameData[tileCounter] = {
-        worldPosition,
-        boardPosition,
-        playerId,
-        instanceId,
-        hoverable,
-        baseColor,
-        hoverColor
-      }
-      tileCounter++;
-    }
-  }
-
-  return tiles;
-}
-
-const makeGameBoard = (gameState, thisPlayerId) => {
-  const gameBoard = {
-    players: {}
-  }
-  gameBoard.tiles = makeTiles(gameState, thisPlayerId);
-  gameBoard.ships = makeShips(gameState);
-  return gameBoard;
 }
 
 const makeLights = () => {
@@ -174,9 +182,33 @@ const makeLights = () => {
   return [light, ambientLight];
 }
 
-const handleTileHover = (raycaster, tiles, prevTileId) => {
+const placeObjectAt = (threeObj, vector2) => {
+  const matrix = getMatrixFor(vector2);
+  threeObj.applyMatrix4(matrix);
+}
+
+// Rotation amount should be in degrees.
+const setRotation = (threeObj, degrees) => {
+  // Rotation begins in the opposite direction you expect, so we flip the amount.
+  degrees = -1 * (degrees - 360)
+  const rad = (degrees / 360) * 2 * Math.PI
+
+  threeObj.rotateZ(rad)
+}
+
+// Gets the Matrix4 corresponding to the input X and Y
+const getMatrixFor = vector2 => {
+  const [col, row] = vector2;
+  const [sceneX, sceneY] = hlpB.boardCoordinatesToSceneCoordinates({ col, row })
+  const matrix = new THREE.Matrix4();
+  matrix.makeTranslation(sceneX, sceneY, TILE_BASE);
+  return matrix;
+}
+
+const handleTileHover = (raycaster, gameBoard, prevTileId) => {
   // 1. Load the data for the last tile hovered over.
-  let prevTileData = tiles.gameData[prevTileId];
+  let { tiles } = gameBoard;
+  let prevTileData = gameBoard.tileData[prevTileId];
   // 2. Set up conditions.
   // Are we hovering over any tiles?
   const tileIntersections = raycaster.intersectObject(tiles);
@@ -184,19 +216,19 @@ const handleTileHover = (raycaster, tiles, prevTileId) => {
   if (tileIntersections.length > 0) {
     // Save the instanceID of the tile
     currentlyHoveredId = tileIntersections[0].instanceId;
-    const currentTileData = tiles.gameData[currentlyHoveredId]
+    const currentTileData = gameBoard.tileData[currentlyHoveredId]
 
     // If we're hovering over a new tile...
     if (prevTileId !== currentlyHoveredId) {
       // If the old tile was hoverable, reset its color.
-      const tileBaseColor = tiles.gameData[prevTileId].baseColor;
+      const tileBaseColor = gameBoard.tileData[prevTileId].baseColor;
       prevTileData.hoverable && tiles.setColorAt(prevTileId, tileBaseColor);
     }
 
     // If the current tile is interactable...
     if (currentTileData.hoverable) {
       // Set its color to the hover color.
-      const tileHoverColor = tiles.gameData[currentlyHoveredId].hoverColor;
+      const tileHoverColor = gameBoard.tileData[currentlyHoveredId].hoverColor;
       tiles.setColorAt(currentlyHoveredId, tileHoverColor)
     }
     tiles.instanceColor.needsUpdate = true;
@@ -205,14 +237,14 @@ const handleTileHover = (raycaster, tiles, prevTileId) => {
   //    hovering over a hoverable tile...
   else if (prevTileData.hoverable) {
     // Reset its color.
-    const tileBaseColor = tiles.gameData[prevTileId].baseColor;
+    const tileBaseColor = gameBoard.tileData[prevTileId].baseColor;
     tiles.setColorAt(prevTileId, tileBaseColor);
     tiles.instanceColor.needsUpdate = true;
 
     // And update to show that we're not hovering over any tiles.
     currentlyHoveredId = 'none';
   }
-  return( { ...tiles.gameData[currentlyHoveredId] })
+  return( { ...gameBoard.tileData[currentlyHoveredId] })
 };
 
 // Create a simple green cube for dev/test purposes.

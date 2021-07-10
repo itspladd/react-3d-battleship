@@ -22,7 +22,7 @@ export default function use3DBoard(canvasRef, gameStateRef) {
     }
   });
   const messageData = useRef({ update: false, timestamp: Date.now() });
-  console.log('refreshing?')
+  //console.log('refreshing?')
 
   useEffect(() => {
     // === THREE.JS CODE START ===
@@ -44,13 +44,13 @@ export default function use3DBoard(canvasRef, gameStateRef) {
     // Create an object to hold data about the 3D board space.
     const gameBoard = hlp3.makeGameBoard(gameStateRef.current, playerId)
     // Set up the board! This means placing and coloring all the tiles.
-    const tiles = hlp3.makeTiles(gameStateRef.current, playerId);
+    //const tiles = hlp3.makeTiles(gameStateRef.current, playerId);
     const ships = hlp3.makeShips(gameStateRef.current);
     const lights = hlp3.makeLights();
     for (let light of lights) {
       scene.add(light)
     }
-    scene.add(tiles);
+    gameBoard.addAllToScene(scene);
     scene.add(ships[0])
     scene.add(ships[1])
 
@@ -83,7 +83,7 @@ export default function use3DBoard(canvasRef, gameStateRef) {
     let animate = function () {
       requestAnimationFrame(animate);
       raycaster.setFromCamera(mouse, camera)
-      const currentHover = hlp3.handleTileHover(raycaster, tiles, previousHoverId);
+      const currentHover = hlp3.handleTileHover(raycaster, gameBoard, previousHoverId);
       if (currentHover.instanceId !== previousHoverId) {
         setInteractionData(prev => ({ ...prev, currentHover}));
       }

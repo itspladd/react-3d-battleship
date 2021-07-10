@@ -7,15 +7,15 @@ const {
   COLUMNS_BETWEEN
 } = require('../constants/3DBOARD').BOARD_DIMENSIONS;
 
+const { TILE_RADIUS, TILE_HEIGHT, TILE_BASE } = require('../constants/3DBOARD').TILE_GEOMETRY
+
 // Give it [x, y] for a tile and [xOffset, yOffset] for a location,
 // and get back the coordinates in the scene where the center of that tile exists.
 const boardCoordinatesToSceneCoordinates = function ({
   col,
   row,
   xOffset,
-  yOffset,
-  tileRadius,
-  tileHeight
+  yOffset
 }) {
   // If no x/y offset given, set them to 0
   xOffset = xOffset || 0;
@@ -24,9 +24,9 @@ const boardCoordinatesToSceneCoordinates = function ({
   let newY = 0;
 
   // Horizontal distance from center of one tile to center of next
-  const xOffsetPerTile = 1.5 * tileRadius;
+  const xOffsetPerTile = 1.5 * TILE_RADIUS;
   // Vertical distance from center of one tile to center of next
-  const yOffsetPerTile = 2 * tileHeight;
+  const yOffsetPerTile = 2 * TILE_HEIGHT;
   // Extra vertical offset for odd-numbered columns;
   const oddColumnOffset = yOffsetPerTile / 2;
 
@@ -40,20 +40,24 @@ const boardCoordinatesToSceneCoordinates = function ({
 
 // Check all player boards to see if a tile is inside the boundaries of that board.
 // Return the data about that board.
-const tileBoardData = (boundaries, tilePos) => {
-  for (let boundaryObj of Object.values(boundaries)) {
-    const { id, startX, startY, endX, endY } = boundaryObj;
+const tileInBoard = (boardBoundaries, tilePos) => {
+  for (const boundaryData of boardBoundaries) {
+    const { id, startX, startY, endX, endY } = boundaryData;
     const [x, y] = tilePos;
     if (x >= startX && x <= endX && y >= startY && y <= endY) {
-      return { id, startX, startY };
+      return [id, startX, startY];
     }
   }
 
-  return null;
+  return [null, null, null];
 }
 
 const tileRelativePosition = (startX, startY, tileX, tileY) => {
   return [tileX - startX, tileY - startY]
+}
+
+const getWorldPosition = (x, y, offsetX, offsetY) => {
+  return [x + offsetX, y + offsetY]
 }
 
 const determinePlayerBoardBoundaries = (gameState, firstBoardPlayerId) => {
@@ -63,10 +67,9 @@ const determinePlayerBoardBoundaries = (gameState, firstBoardPlayerId) => {
 
   // "Rotate" the array until the first player ID is the same as the input ID
   while(playersArr[0].id !== firstBoardPlayerId) {
-    console.log(playersArr[0].id, firstBoardPlayerId)
     playersArr.push(playersArr.shift());
   }
-  const playerBoundaries = {};
+  const playerBoundaries = [];
   let currentX = COLUMNS_LEFT - 1; // Offset by 1 to account for 0-index
   for (let i = 0; i < playersArr.length; i++) {
     const currentPlayer = playersArr[i];
@@ -80,13 +83,13 @@ const determinePlayerBoardBoundaries = (gameState, firstBoardPlayerId) => {
     const endX = startX + currentPlayer.board.columns - 1;
     const endY = startY + currentPlayer.board.rows - 1;
     currentX = endX;
-    playerBoundaries[id] = { id, startX, startY, endX, endY }
+    playerBoundaries[i] = { id, startX, startY, endX, endY }
   }
 
   return playerBoundaries;
 }
 
-const determineTotalTiles = gameState => {
+const determineBoardDimensions = gameState => {
   const playersArr = Object.values(gameState.players);
   // Boards are drawn horizontally next to each other, so the
   // number of player rows is just one player's rows.
@@ -101,13 +104,14 @@ const determineTotalTiles = gameState => {
 
   const totalRows = playerRows + ROWS_TOP + ROWS_BOTTOM;
   const totalCols = playerCols + spacerColsTotal + COLUMNS_LEFT + COLUMNS_RIGHT;
-  return {totalRows, totalCols}
+  return [totalRows, totalCols]
 }
 
 module.exports = {
   boardCoordinatesToSceneCoordinates,
   determinePlayerBoardBoundaries,
-  tileBoardData,
+  tileInBoard,
   tileRelativePosition,
-  determineTotalTiles
+  determineBoardDimensions,
+  getWorldPosition
 }
