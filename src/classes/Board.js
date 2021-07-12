@@ -51,7 +51,6 @@ class Board {
     for(let x = this.startX; x <= this.endX; x++) {
       for (let y = this.startY; y <= this.endY; y++) {
         const position = [x, y, 0];
-        console.log('making tile at', x, y)
         tiles[tileId] = new PlayerBoardTile(tileId, this.tileMesh, position, this)
         tileId++;
       }

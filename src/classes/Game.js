@@ -2,6 +2,9 @@ import * as THREE from 'three';
 
 // Classes
 import Player from './Player'
+import Tiles from './Tile'
+
+const { Tile, InstancedTile } = Tiles;
 
 // Helpers
 const { getNeighborsInDirection } = require('@itspladd/battleship-engine').HELPERS.positionHelpers
@@ -82,6 +85,19 @@ class Game {
     this.boardBoundaries = this.findPlayerBoundaries(gameState, ownerId)
 
     this.players = this.initPlayers(gameState, this.boardBoundaries);
+    this.fillerTiles = this.initFillerTiles();
+  }
+
+  get mapRows() {
+    return this.mapDimensions[0];
+  }
+
+  get mapColumns() {
+    return this.mapDimensions[1];
+  }
+
+  get totalTiles() {
+    return this.mapRows * this.mapColumns;
   }
 
   initPlayers(gameState, boardBoundaries) {
@@ -94,6 +110,24 @@ class Game {
     }
 
     return players;
+  }
+
+  initFillerTiles() {
+    const fillerTileMesh = new THREE.InstancedMesh(Tile.geometry, Tile.material, this.totalTiles)
+    const fillerTiles = {};
+    let tileCounter = 0;
+
+    for (let x = 0; x < this.mapColumns; x++) {
+      for (let y = 0; y < this.mapRows; y++) {
+        if (!this.locationInBoardBoundaries(x, y)) {
+          console.log('making filler tile', tileCounter)
+          const position = [x, y, 0];
+          fillerTiles[tileCounter] = new InstancedTile(tileCounter, fillerTileMesh, position)
+          tileCounter++;
+        }
+      }
+    }
+    return fillerTileMesh;
   }
 
   findPlayerBoundaries = (gameState, firstBoardPlayerId) => {
@@ -123,6 +157,22 @@ class Game {
     }
 
     return playerBoundaries;
+  }
+
+  locationInBoardBoundaries(x, y) {
+    const results = Object.values(this.boardBoundaries)
+      .filter(boundary => {
+        const { startX, startY, endX, endY } = boundary;
+        return this.locationInArea(x, y, [startX, startY], [endX, endY])
+      })
+    return results.length !== 0;
+  }
+
+  locationInArea(x, y, startPos, endPos) {
+    return x >= startPos[0] &&
+           x <= endPos[0]   &&
+           y >= startPos[1] &&
+           y <= endPos[1]
   }
 
   mapDimensions(gameState) {

@@ -18,6 +18,7 @@ class GameViewer {
     this._lights = this.setupLights();
     this._axes = this.makeAxes();
     this._pointer = this.setupPointer();
+    this._currentHover = null;
 
     // Add initial stuff to scene
     this.add(this._lights);
@@ -65,6 +66,9 @@ class GameViewer {
   }
 
   addGameToScene(game) {
+    // Add filler tiles
+    this.add(game.fillerTiles)
+    // Add player boards
     Object.values(game.players).forEach(player => {
       const tileMesh = player.board.tileMesh;
       const testMatrix = new THREE.Matrix4();
@@ -118,6 +122,10 @@ class GameViewer {
     this._raycaster.setFromCamera(this._pointer, this._camera)
 
     this._renderer.render(this._scene, this._camera);
+  }
+
+  detectHover() {
+    
   }
 
   // Create a simple green cube for dev/test purposes.
