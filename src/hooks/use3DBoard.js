@@ -2,13 +2,15 @@ import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three';
 
 // Helper functions
-import { hlp3 } from '../helpers/threeHelpers'
+//import { hlp3 } from '../helpers/threeHelpers'
+
+import GameViewer from '../classes/GameViewer'
 
 export default function use3DBoard(canvasRef, gameStateRef) {
   // DEV - REMOVE LATER
   const playerId = 'p2';
 
-  const [interactionData, setInteractionData] = useState({
+  const [viewerData, setViewerData] = useState({
     pointer: {
       normalizedPosition: [-1, -1],
       rawPosition: [0, 0]
@@ -30,8 +32,7 @@ export default function use3DBoard(canvasRef, gameStateRef) {
 
   useEffect(() => {
     // === THREE.JS CODE START ===
-
-    const [
+/*     const [
       scene,
       camera,
       renderer,
@@ -42,10 +43,10 @@ export default function use3DBoard(canvasRef, gameStateRef) {
     hlp3.limitCameraMovement(controls); // Add camera movement limits
 
     // Add axis helper
-    scene.add(hlp3.makeAxesHelpers())
+    scene.add(hlp3.makeAxesHelpers()) */
 
 
-    // Create an object to hold data about the 3D board space.
+/*     // Create an object to hold data about the 3D board space.
     const gameBoard = hlp3.makeGameBoard(gameStateRef.current, playerId)
     // Set up the board! This means placing and coloring all the tiles.
     //const tiles = hlp3.makeTiles(gameStateRef.current, playerId);
@@ -54,12 +55,12 @@ export default function use3DBoard(canvasRef, gameStateRef) {
       scene.add(light)
     }
     gameBoard.addAllToScene(scene);
-
+    hlp3.positionObject(gameBoard.ships[0], [10, 10], 120) */
     //scene.add(makeTestCube()); // Puts a test cube in the scene
 
 
 
-    // Set up mouse
+/*     // Set up mouse
     const mouse = new THREE.Vector2(-1, -1);
     const onMouseMove = (event) => {
       //calculate mouse position
@@ -81,10 +82,11 @@ export default function use3DBoard(canvasRef, gameStateRef) {
         pointer,
         camera: cam
       }))
-    }
-    window.addEventListener('mousemove', onMouseMove, false);
+    } */
+    const viewer = new GameViewer(window, canvasRef, setViewerData)
+    window.addEventListener('mousemove', viewer.onPointerMove, false);
 
-    let previousHoverId = 'none';
+/*     let previousHoverId = 'none';
 
     let animate = function () {
       requestAnimationFrame(animate);
@@ -100,16 +102,18 @@ export default function use3DBoard(canvasRef, gameStateRef) {
         messageData.current.update = false;
       }
       renderer.render(scene, camera);
-    };
-    animate();
+    }; */
+    viewer.animate();
     // === THREE.JS CODE END ===
   }, [])
 
-  return [interactionData, messageData]
+  return [viewerData, messageData]
 }
 
 const updateBoard = (gameState) => {
   console.log('updated')
   console.log(gameState.players.p1.board.ships)
+  // Update ship positions
+
   return true;
 }

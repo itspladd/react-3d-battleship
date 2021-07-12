@@ -11,17 +11,6 @@ const { getNeighborsInDirection } = require('@itspladd/battleship-engine').HELPE
 
 const { TILE_RADIUS, TILE_HEIGHT, TILE_THICKNESS, TILE_BASE } = TILE_GEOMETRY;
 
-// Set up colors
-const boardBaseColor = new THREE.Color(COLORS.PLAYER_BOARD_TILE_BASE_COLOR);
-const boardHoverColor = new THREE.Color(COLORS.PLAYER_BOARD_TILE_HOVER_COLOR);
-const tileFillerColor = new THREE.Color(COLORS.TILE_NONINTERACTIVE_COLOR)
-
-// Set up materials
-// Make the material for all tiles
-let tileMaterial = new THREE.MeshStandardMaterial({
-  ...MATERIALS.TILE_MATERIAL
-});
-
 const setupScene = (window, canvas) => {
   // Create basic three.js stuff
   let scene, camera, renderer, controls, raycaster;
@@ -64,7 +53,6 @@ const makeGameBoard = (gameState, thisPlayerId) => {
     tileMatrix.push([])
   }
   gameBoard.tileAt = tileMatrix;
-  gameBoard.tileAt[0][0] = 5;
 
   gameBoard.boundaries = hlpB.determinePlayerBoardBoundaries(gameState, thisPlayerId);
 
@@ -90,6 +78,7 @@ const makeTiles = (gameBoard, playerId) => {
   // Calculate the total number of tiles
   const [ totalRows, totalCols ] = gameBoard.dimensions;
   const totalTiles = totalRows * totalCols;
+  let tileMaterial = new THREE.MeshStandardMaterial({...MATERIALS.TILE_MATERIAL});
 
   // Create the instanced mesh for all tiles
   let tiles = new THREE.InstancedMesh(hexGeometry, tileMaterial, totalTiles);
@@ -110,44 +99,7 @@ const makeTiles = (gameBoard, playerId) => {
     }
   };
 
-  // Make a board!
-  let tileCounter = 0;
-  for (let row = 0; row < totalRows; row++) {
-    for (let col = 0; col < totalCols; col++) {
-      // Set the transformation for this tile.
-      tiles.setMatrixAt(tileCounter, getMatrixFor([col, row]));
-
-      // Set tile color and attributes depending on whether it's part of a player board.
-
-      let worldPosition = [col, row]
-      let [playerId, startX, startY] = hlpB.tileInBoard(gameBoard.boundaries, worldPosition);
-      let boardPosition = null;
-      let instanceId = tileCounter;
-      let hoverable = false;
-      let baseColor = tileFillerColor;
-      let hoverColor = null;
-      // If this is part of a board, set its color to the base color.
-      // Otherwise, set it to the "non-interactive" color
-      if (playerId !== null) {
-        baseColor = boardBaseColor;
-        hoverColor = boardHoverColor
-        hoverable = true;
-        boardPosition = hlpB.tileRelativePosition(startX, startY, col, row)
-      }
-      tiles.setColorAt(tileCounter, baseColor);
-      gameBoard.tileData[tileCounter] = {
-        worldPosition,
-        boardPosition,
-        playerId,
-        instanceId,
-        hoverable,
-        baseColor,
-        hoverColor
-      }
-      gameBoard.tileAt[col][row] = instanceId;
-      tileCounter++;
-    }
-  }
+  
 
   return tiles;
 }
@@ -303,7 +255,8 @@ const hlp3 = {
   makeLights,
   handleTileHover,
   makeTestCube,
-  makeAxesHelpers
+  makeAxesHelpers,
+  positionObject
 }
 
 export { hlp3 };
