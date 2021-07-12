@@ -80,6 +80,7 @@ class HoverableTile extends InstancedTile {
 class PlayerBoardTile extends HoverableTile {
   constructor(id, mesh, position, owner) {
     super(id, mesh, position, Tile.boardColor, Tile.boardHoverColor);
+    console.log('made a board tile, id:', id)
     this._owner = owner;
   }
 
@@ -98,6 +99,6 @@ const Tiles = {
   InstancedTile,
   HoverableTile,
   PlayerBoardTile
-}
+};
 
-export default Tiles
+export default Tiles;

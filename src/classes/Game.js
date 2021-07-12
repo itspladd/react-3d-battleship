@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 // Classes
-const Player = require('./Player')
+import Player from './Player'
 
 // Helpers
 const { getNeighborsInDirection } = require('@itspladd/battleship-engine').HELPERS.positionHelpers
@@ -89,6 +89,7 @@ class Game {
     for (let id in gameState.players) {
       const currentBoardBoundaries = boardBoundaries
         .filter(boundary => boundary.id === id)
+        [0]
       players[id] = new Player(this, gameState.players[id], currentBoardBoundaries)
     }
 

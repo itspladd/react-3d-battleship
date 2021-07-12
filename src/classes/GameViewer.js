@@ -4,21 +4,20 @@ import Game from './Game';
 
 class GameViewer {
   constructor(window, canvasRef, setViewerData) {
-    this._scene = new THREE.Scene();
-    this._camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    this._renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current });
-    this._raycaster = new THREE.Raycaster();
-    this._controls = new MapControls(this._camera, canvasRef.current)
+    this._canvasRef = canvasRef;
+    this._setViewerData = setViewerData;
 
-    this.setViewerData = setViewerData;
+    this._scene = new THREE.Scene();
+    this._renderer = new THREE.WebGLRenderer({ canvas: this._canvasRef.current });
+    this._raycaster = new THREE.Raycaster();
+    this._camera = this.setupCamera();
+    this._controls = this.setupControls();
+
 
     this._renderer.setSize(window.innerWidth, window.innerHeight);
     this._lights = this.makeLights();
     this._axes = this.makeAxes();
     this._pointer = this.setupPointer();
-
-    this.setupCamera();
-    this.setupControls();
 
     // Add initial stuff to scene
     this.add(this._lights);
@@ -34,20 +33,26 @@ class GameViewer {
   }
 
   setupCamera() {
-    this._camera.position.z = 20;
-    this._camera.position.y = 0;
-    this._camera.position.x = 0;
-    this._camera.lookAt(0, 0, 0)
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 20;
+    camera.position.y = 0;
+    camera.position.x = 0;
+    camera.lookAt(0, 0, 0)
+
+    return camera;
   }
 
   setupControls() {
-    this._controls.screenSpacePanning = true;
+    const controls = new MapControls(this._camera, this._canvasRef.current)
+    controls.screenSpacePanning = true;
 
     // Put angle limits on the camera movement
-    this._controls.maxAzimuthAngle = 0;
-    this._controls.minAzimuthAngle = 0;
-    this._controls.maxPolarAngle = Math.PI * .8;
-    this._controls.minPolarAngle = Math.PI / 2;
+    controls.maxAzimuthAngle = 0;
+    controls.minAzimuthAngle = 0;
+    controls.maxPolarAngle = Math.PI * .8;
+    controls.minPolarAngle = Math.PI / 2;
+
+    return controls
   }
 
   setupPointer() {
@@ -56,10 +61,17 @@ class GameViewer {
 
   initGame(gameState, ownerId) {
     this._currentGame = new Game(gameState, ownerId);
+    this.addGameToScene(this._currentGame)
   }
 
-  addAllToScene(game) {
-
+  addGameToScene(game) {
+    Object.values(game.players).forEach(player => {
+      const tileMesh = player.board.tileMesh;
+      const testMatrix = new THREE.Matrix4();
+      tileMesh.getMatrixAt(2, testMatrix)
+      console.log(testMatrix)
+      this.add(player.board.tileMesh)
+    });
   }
 
   makeLights() {
@@ -92,7 +104,7 @@ class GameViewer {
       position: this._camera.position,
       rotation: this._camera.quaternion
     }
-    this.setViewerData(prev => ({
+    this._setViewerData(prev => ({
       ...prev,
       pointer,
       camera: cam

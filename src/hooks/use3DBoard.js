@@ -59,33 +59,9 @@ export default function use3DBoard(canvasRef, gameStateRef) {
     //scene.add(makeTestCube()); // Puts a test cube in the scene
 
 
-
-/*     // Set up mouse
-    const mouse = new THREE.Vector2(-1, -1);
-    const onMouseMove = (event) => {
-      //calculate mouse position
-      if(event.button) {
-        console.log(event.button)
-      }
-      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-      mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
-      const pointer = {
-        normalizedPosition: [mouse.x, mouse.y],
-        rawPosition: [event.clientX, event.clientY]
-      }
-      const cam = {
-        position: camera.position,
-        rotation: camera.quaternion
-      }
-      setInteractionData(prev => ({
-        ...prev,
-        pointer,
-        camera: cam
-      }))
-    } */
     const viewer = new GameViewer(window, canvasRef, setViewerData)
     window.addEventListener('mousemove', viewer.onPointerMove, false);
-
+    viewer.initGame(gameStateRef.current, playerId)
 /*     let previousHoverId = 'none';
 
     let animate = function () {

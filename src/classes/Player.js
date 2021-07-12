@@ -1,4 +1,4 @@
-const Board = require('./Board')
+import Board from './Board'
 
 class Player {
   constructor(owner, playerData, boardBoundary) {
