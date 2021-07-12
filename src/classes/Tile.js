@@ -70,11 +70,15 @@ class HoverableTile extends InstancedTile {
   }
 
   onHover() {
+    console.log('hovering')
     this.color = this._hoverColor;
+    this._mesh.instanceColor.needsUpdate = true;
   }
 
   onHoverExit() {
+    console.log('exiting')
     this.color = this._color;
+    this._mesh.instanceColor.needsUpdate = true;
   }
 }
 

@@ -18,7 +18,7 @@ export default function GameWindow() {
 
 
   const [engine, moves, gameStateRef, makeMove] = useGameEngine();
-  const [interactionData, messageData] = use3DBoard(renderCanvas, gameStateRef);
+  const [viewerData, messageData] = use3DBoard(renderCanvas, gameStateRef);
 
   const handleClick = () => {
     console.log('handling click')
@@ -55,17 +55,17 @@ export default function GameWindow() {
     return arr.map(pos => Number.parseFloat(pos).toFixed(2)).join(', ');
   }
 
-  const mouseData = interactionData.pointer.normalizedPosition;
-  const cameraPos = interactionData.camera.position;
-  const cameraRot = interactionData.camera.rotation;
+  const mouseData = viewerData.pointer.normalizedPosition;
+  const cameraPos = viewerData.camera.position;
+  const cameraRot = viewerData.camera.rotation;
 
   const mouseDataText = makeString(mouseData);
   const cameraPosText = makeString(cameraPos);
   const cameraRotText = makeString(cameraRot);
 
   const currentTileInfo = [];
-  for (let key in interactionData.currentHover) {
-    currentTileInfo.push(<li>{key}: {JSON.stringify(interactionData.currentHover[key])}</li>)
+  for (let key in viewerData.currentHover) {
+    currentTileInfo.push(<li>{key}: {JSON.stringify(viewerData.currentHover[key])}</li>)
   }
   return (
     <div className="game-window">
@@ -77,7 +77,7 @@ export default function GameWindow() {
           <li>Camera pos: {cameraPosText}</li>
           <li>Camera rot: {cameraRotText}</li>
         </ul>
-        {interactionData.currentHover.instanceId}
+        {viewerData.currentHover.instanceId}
         <ul>
           {currentTileInfo}
         </ul>

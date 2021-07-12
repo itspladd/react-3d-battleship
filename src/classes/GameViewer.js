@@ -18,7 +18,10 @@ class GameViewer {
     this._lights = this.setupLights();
     this._axes = this.makeAxes();
     this._pointer = this.setupPointer();
-    this._currentHover = null;
+
+    this._currentHovers = [];
+    this._prevHovers = [];
+
 
     // Add initial stuff to scene
     this.add(this._lights);
@@ -120,12 +123,35 @@ class GameViewer {
   animate() {
     requestAnimationFrame(this.animate);
     this._raycaster.setFromCamera(this._pointer, this._camera)
-
+    this.detectHover();
     this._renderer.render(this._scene, this._camera);
   }
 
   detectHover() {
-    
+    // Assum no current hover.
+    this._currentHovers = [];
+    if(this._currentGame) {
+      // TODO: Detect ships
+      Object.values(this._currentGame.players).forEach(player => {
+        const boardIntersections = this._raycaster.intersectObject(player.board.tileMesh);
+        if (boardIntersections.length > 0) {
+          const tile = boardIntersections[0];
+
+          // Add tile object to current hover list
+          this._currentHovers.push(player.board.tiles[tile.instanceId])
+        }
+      })
+    }
+
+    // If we were already hovering over any items...
+
+    const newHovers = this._prevHovers.filter(prevHoverable => this._currentHovers.includes(prevHoverable));
+    const abandonedHovers = this._prevHovers.filter(prevHoverable => !this._currentHovers.includes(prevHoverable));
+
+    newHovers.forEach(hoverable => hoverable.onHover());
+    abandonedHovers.forEach(hoverable => hoverable.onHoverExit());
+
+    this._prevHovers = this._currentHovers;
   }
 
   // Create a simple green cube for dev/test purposes.
