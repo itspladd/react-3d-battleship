@@ -15,7 +15,7 @@ class GameViewer {
 
 
     this._renderer.setSize(window.innerWidth, window.innerHeight);
-    this._lights = this.makeLights();
+    this._lights = this.setupLights();
     this._axes = this.makeAxes();
     this._pointer = this.setupPointer();
 
@@ -74,7 +74,7 @@ class GameViewer {
     });
   }
 
-  makeLights() {
+  setupLights() {
     // Add some lights!
     const light = new THREE.DirectionalLight(0xffffff, 1)
     const ambientLight = new THREE.AmbientLight(0xffffff, .5)
@@ -84,6 +84,8 @@ class GameViewer {
     light.position.y = 5;
     light.position.z = 10;
 
+    this.add(light);
+    this.add(ambientLight);
     return [light, ambientLight];
   }
 
@@ -116,6 +118,17 @@ class GameViewer {
     this._raycaster.setFromCamera(this._pointer, this._camera)
 
     this._renderer.render(this._scene, this._camera);
+  }
+
+  // Create a simple green cube for dev/test purposes.
+  makeTestCube() {
+    const box = new THREE.BoxGeometry(1, 1, 1);
+    const m = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+    const cube = new THREE.Mesh(box, m);
+    cube.position.x = 5
+    cube.position.y = 5
+    cube.position.z = 5
+    return cube;
   }
 }
 

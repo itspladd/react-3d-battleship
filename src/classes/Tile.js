@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { TILE_GEOMETRY, MATERIALS, COLORS } from '../constants/3DBOARD';
 
-const Game = require('./Game');
+import Game from './Game';
 
 const { TILE_RADIUS, TILE_HEIGHT, TILE_THICKNESS, TILE_BASE } = TILE_GEOMETRY;
 
@@ -29,6 +29,7 @@ class InstancedTile extends Tile {
     this._x = position[0];
     this._y = position[1];
     this.position3D = position;
+    this.color = color;
   }
 
   get id() {

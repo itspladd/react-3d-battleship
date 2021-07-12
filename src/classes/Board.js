@@ -13,10 +13,11 @@ class Board {
     this._rows = boardData.rows
     this._columns = boardData.columns
     console.log('new board, ', this._start, this._end)
-  
     this.tileMesh = new THREE.InstancedMesh(Tile.geometry, Tile.material, this.numTiles)
 
     this.tiles = this.makeTiles()
+    //this.tileMesh.instanceColor.needsUpdate = true;
+    this.tileMesh.instanceMatrix.needsUpdate = true;
   }
 
   get startX() {
@@ -52,6 +53,7 @@ class Board {
         const position = [x, y, 0];
         console.log('making tile at', x, y)
         tiles[tileId] = new PlayerBoardTile(tileId, this.tileMesh, position, this)
+        tileId++;
       }
     }
 
