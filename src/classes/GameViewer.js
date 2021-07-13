@@ -118,16 +118,19 @@ class GameViewer {
       pointer,
       camera: cam
     }))
+
+
   }
 
   animate() {
     requestAnimationFrame(this.animate);
     this._raycaster.setFromCamera(this._pointer, this._camera)
-    this.detectHover();
+    this.detectHovers();
+    this.handleHovers();
     this._renderer.render(this._scene, this._camera);
   }
 
-  detectHover() {
+  detectHovers() {
     // Assum no current hover.
     this._currentHovers = [];
     if(this._currentGame) {
@@ -142,7 +145,9 @@ class GameViewer {
         }
       })
     }
+  }
 
+  handleHovers() {
     // If we were already hovering over any items...
 
     const newHovers = this._prevHovers.filter(prevHoverable => this._currentHovers.includes(prevHoverable));
