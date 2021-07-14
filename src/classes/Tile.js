@@ -14,7 +14,7 @@ class Tile {
                     .rotateX(Math.PI * 0.5)  // Turn the tile so it's laying "flat"
                     .rotateZ(Math.PI * 0.5); // Turn the tile to "point" sideways
 
-  constructor() {
+  constructor(type) {
     this._timestamp = Date.now();
   }
 }
@@ -70,27 +70,29 @@ class HoverableTile extends InstancedTile {
   }
 
   onHover() {
-    console.log('hovering')
     this.color = this._hoverColor;
     this._mesh.instanceColor.needsUpdate = true;
   }
 
   onHoverExit() {
-    console.log('exiting')
     this.color = this._color;
     this._mesh.instanceColor.needsUpdate = true;
   }
 }
 
 class PlayerBoardTile extends HoverableTile {
-  constructor(id, mesh, position, owner) {
+  constructor(id, mesh, position, owner, type) {
     super(id, mesh, position, Tile.boardColor, Tile.boardHoverColor);
-    console.log('made a board tile, id:', id)
     this._owner = owner;
+    this._type = type;
   }
 
   get owner() {
     return this._owner;
+  }
+
+  set type(newType) {
+    this._type = newType;
   }
 
   // Position on this specific game board using integer values.

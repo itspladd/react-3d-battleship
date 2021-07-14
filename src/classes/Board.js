@@ -6,18 +6,17 @@ const { Tile, PlayerBoardTile } = Tiles;
 class Board {
   constructor(owner, boardData, boundaries) {
     this._owner = owner;
-    console.log(boundaries)
     const { startX, startY, endX, endY } = boundaries;
     this._start = [startX, startY];
     this._end = [endX, endY];
-    this._rows = boardData.rows
-    this._columns = boardData.columns
-    console.log('new board, ', this._start, this._end)
+    this._rows = boardData.rows;
+    this._columns = boardData.columns;
     this.tileMesh = new THREE.InstancedMesh(Tile.geometry, Tile.material, this.numTiles)
 
-    this.tiles = this.makeTiles()
-    //this.tileMesh.instanceColor.needsUpdate = true;
-    this.tileMesh.instanceMatrix.needsUpdate = true;
+    this.tiles = this.makeTiles(boardData);
+    this.ships = this.makeShips(boardData)
+
+    console.log(boardData)
   }
 
   get startX() {
@@ -44,21 +43,31 @@ class Board {
     return this._rows * this._columns
   }
 
-  makeTiles() {
-    console.log('making tiles')
+  makeTiles(boardData) {
     let tileId = 0;
+    let y = this.startY;
     const tiles = {}
-    for(let x = this.startX; x <= this.endX; x++) {
-      for (let y = this.startY; y <= this.endY; y++) {
+    const tileMatrix = [];
+    for(const row of boardData.tiles) {
+      const tileMatrixRow = [];
+      let x = this.startX;
+      for (const tile of row) {
         const position = [x, y, 0];
         tiles[tileId] = new PlayerBoardTile(tileId, this.tileMesh, position, this)
+        tileMatrixRow.push(tileId);
         tileId++;
+        x++;
       }
+      y++;
+      tileMatrix.push(tileMatrixRow);
     }
-
+    console.log(tileMatrix)
     return tiles;
   }
 
+  makeShips(boardData) {
+    console.log(boardData.ships)
+  }
 }
 
 export default Board;

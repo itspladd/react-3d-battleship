@@ -67,6 +67,7 @@ export default function GameWindow() {
   for (let key in viewerData.currentHover) {
     currentTileInfo.push(<li>{key}: {JSON.stringify(viewerData.currentHover[key])}</li>)
   }
+
   return (
     <div className="game-window">
       <div id="info">

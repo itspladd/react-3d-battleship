@@ -24,7 +24,7 @@ class GameViewer {
 
 
     // Add initial stuff to scene
-    this.add(this._lights);
+    this.addArr(this._lights);
     this.add(this._axes);
 
     // Binding functions that get called in odd scopes
@@ -34,6 +34,12 @@ class GameViewer {
 
   add(object) {
     this._scene.add(object);
+  }
+
+  addArr(objects) {
+    for (let object of objects) {
+      this.add(object)
+    }
   }
 
   setupCamera() {
@@ -140,6 +146,8 @@ class GameViewer {
     this._currentHovers = [];
     if(this._currentGame) {
       // TODO: Detect ships
+
+      // Detect tiles
       Object.values(this._currentGame.players).forEach(player => {
         const boardIntersections = this._raycaster.intersectObject(player.board.tileMesh);
         if (boardIntersections.length > 0) {

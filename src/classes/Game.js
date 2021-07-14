@@ -84,6 +84,8 @@ class Game {
     this.mapDimensions = this.mapDimensions(gameState);
     this.boardBoundaries = this.findPlayerBoundaries(gameState, ownerId)
 
+    // Players create Boards during construction.
+    // Boards include Tiles and Ships, so look in Board.js for Tile/Ship init.
     this.players = this.initPlayers(gameState, this.boardBoundaries);
     this.fillerTiles = this.initFillerTiles();
   }
@@ -120,7 +122,6 @@ class Game {
     for (let x = 0; x < this.mapColumns; x++) {
       for (let y = 0; y < this.mapRows; y++) {
         if (!this.locationInBoardBoundaries(x, y)) {
-          console.log('making filler tile', tileCounter)
           const position = [x, y, 0];
           fillerTiles[tileCounter] = new InstancedTile(tileCounter, fillerTileMesh, position)
           tileCounter++;
