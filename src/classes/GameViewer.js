@@ -125,6 +125,11 @@ class GameViewer {
   animate() {
     requestAnimationFrame(this.animate);
     this._raycaster.setFromCamera(this._pointer, this._camera)
+
+    // If the board needs to be updated, update the board.
+    //TODO: FILL IN
+    //
+
     this.detectHovers();
     this.handleHovers();
     this._renderer.render(this._scene, this._camera);

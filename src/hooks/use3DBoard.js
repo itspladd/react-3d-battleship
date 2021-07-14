@@ -32,31 +32,8 @@ export default function use3DBoard(canvasRef, gameStateRef) {
 
   useEffect(() => {
     // === THREE.JS CODE START ===
-/*     const [
-      scene,
-      camera,
-      renderer,
-      controls,
-      raycaster
-    ] = hlp3.setupScene(window, canvasRef.current);
-    hlp3.positionCamera(camera);
-    hlp3.limitCameraMovement(controls); // Add camera movement limits
 
-    // Add axis helper
-    scene.add(hlp3.makeAxesHelpers()) */
-
-
-/*     // Create an object to hold data about the 3D board space.
-    const gameBoard = hlp3.makeGameBoard(gameStateRef.current, playerId)
-    // Set up the board! This means placing and coloring all the tiles.
-    //const tiles = hlp3.makeTiles(gameStateRef.current, playerId);
-    const lights = hlp3.makeLights();
-    for (let light of lights) {
-      scene.add(light)
-    }
-    gameBoard.addAllToScene(scene);
-    hlp3.positionObject(gameBoard.ships[0], [10, 10], 120) */
-    //scene.add(makeTestCube()); // Puts a test cube in the scene
+    //hlp3.positionObject(gameBoard.ships[0], [10, 10], 120)
 
 
     const viewer = new GameViewer(window, canvasRef, setViewerData)
@@ -64,23 +41,6 @@ export default function use3DBoard(canvasRef, gameStateRef) {
     viewer.initGame(gameStateRef.current, playerId)
     console.log(viewer._scene.children)
 
-/*     let previousHoverId = 'none';
-
-    let animate = function () {
-      requestAnimationFrame(animate);
-      raycaster.setFromCamera(mouse, camera)
-      const currentHover = hlp3.handleTileHover(raycaster, gameBoard, previousHoverId);
-      if (currentHover.instanceId !== previousHoverId) {
-        setInteractionData(prev => ({ ...prev, currentHover}));
-      }
-      previousHoverId = currentHover.instanceId
-      // Update board if necessary
-      if (messageData.current.update) {
-        updateBoard(gameStateRef.current);
-        messageData.current.update = false;
-      }
-      renderer.render(scene, camera);
-    }; */
     viewer.animate();
     // === THREE.JS CODE END ===
   }, [])
