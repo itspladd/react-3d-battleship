@@ -10,6 +10,10 @@ class Player {
 
     this.board = new Board(this, board, boardBoundary)
   }
+
+  get id() {
+    return this._id;
+  }
 }
 
 export default Player;

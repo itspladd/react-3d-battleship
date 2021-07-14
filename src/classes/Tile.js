@@ -25,11 +25,12 @@ class InstancedTile extends Tile {
     super();
     this._id = id;
     this._mesh = mesh;
-    this._color = color;
+    this._color = color; // Save the color of the tile
+    this.color = color; // Actually set the color of the tile
     this._x = position[0];
     this._y = position[1];
     this.position3D = position;
-    this.color = color;
+
   }
 
   get id() {
@@ -74,9 +75,22 @@ class HoverableTile extends InstancedTile {
     this._mesh.instanceColor.needsUpdate = true;
   }
 
+  duringHover() {
+
+  }
+
   onHoverExit() {
     this.color = this._color;
     this._mesh.instanceColor.needsUpdate = true;
+  }
+
+  get hoverData() {
+    return {
+      id: this.id,
+      position: this.position,
+      color: this.color.getHexString(),
+      hoverColor: this._hoverColor.getHexString()
+    }
   }
 }
 
@@ -89,6 +103,18 @@ class PlayerBoardTile extends HoverableTile {
 
   get owner() {
     return this._owner;
+  }
+
+  get playerId() {
+    return this._owner.playerId;
+  }
+
+  get hoverData() {
+    const hoverableData = super.hoverData;
+    return {
+      ...hoverableData,
+      player: this.playerId
+    }
   }
 
   set type(newType) {

@@ -63,9 +63,12 @@ export default function GameWindow() {
   const cameraPosText = makeString(cameraPos);
   const cameraRotText = makeString(cameraRot);
 
-  const currentTileInfo = [];
+  let currentHoverInfo = [];
   for (let key in viewerData.currentHover) {
-    currentTileInfo.push(<li>{key}: {JSON.stringify(viewerData.currentHover[key])}</li>)
+    currentHoverInfo.push(<li>{key}: {JSON.stringify(viewerData.currentHover[key])}</li>)
+  }
+  if(!currentHoverInfo.length) {
+    currentHoverInfo = <li>No hoverable detected</li>
   }
 
   return (
@@ -78,9 +81,8 @@ export default function GameWindow() {
           <li>Camera pos: {cameraPosText}</li>
           <li>Camera rot: {cameraRotText}</li>
         </ul>
-        {viewerData.currentHover.instanceId}
         <ul>
-          {currentTileInfo}
+          {currentHoverInfo}
         </ul>
         <button onClick={() => handleClick()}>Place a ship</button>
         <button onClick={() => messageData.current.update = true}>Tell board to update</button>

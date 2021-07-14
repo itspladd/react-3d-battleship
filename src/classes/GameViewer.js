@@ -82,7 +82,6 @@ class GameViewer {
       const tileMesh = player.board.tileMesh;
       const testMatrix = new THREE.Matrix4();
       tileMesh.getMatrixAt(2, testMatrix)
-      console.log(testMatrix)
       this.add(player.board.tileMesh)
     });
   }
@@ -136,8 +135,7 @@ class GameViewer {
     //TODO: FILL IN
     //
 
-    this.detectHovers();
-    this.handleHovers();
+    this.detectHovers() && this.handleHovers();
     this._renderer.render(this._scene, this._camera);
   }
 
@@ -158,17 +156,24 @@ class GameViewer {
         }
       })
     }
+    const hovering = this._currentHovers.length > 0;
+    if (!hovering) {
+    this._setViewerData(prev => ({ ...prev, currentHover: null }));
+    }
+    return this._currentHovers.length > 0;
   }
 
   handleHovers() {
     // If we were already hovering over any items...
-
+    // Find new hovers and abandoned hovers.
     const newHovers = this._prevHovers.filter(prevHoverable => this._currentHovers.includes(prevHoverable));
     const abandonedHovers = this._prevHovers.filter(prevHoverable => !this._currentHovers.includes(prevHoverable));
 
     newHovers.forEach(hoverable => hoverable.onHover());
     abandonedHovers.forEach(hoverable => hoverable.onHoverExit());
 
+    const currentHover = this._currentHovers.map(hoverable => hoverable.hoverData)[0]
+    this._setViewerData(prev => ({ ...prev, currentHover }));
     this._prevHovers = this._currentHovers;
   }
 

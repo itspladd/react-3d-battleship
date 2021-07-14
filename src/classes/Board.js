@@ -13,10 +13,15 @@ class Board {
     this._columns = boardData.columns;
     this.tileMesh = new THREE.InstancedMesh(Tile.geometry, Tile.material, this.numTiles)
 
-    this.tiles = this.makeTiles(boardData);
-    this.ships = this.makeShips(boardData)
+    const [tilesById, tilesByPosition] = this.makeTiles(boardData);
+    this.tilesById = tilesById;
+    this.tilesByPosition = tilesByPosition;
+    this.ships = this.makeShips(boardData);
 
-    console.log(boardData)
+  }
+
+  get tiles() {
+    return this.tilesById;
   }
 
   get startX() {
@@ -42,6 +47,10 @@ class Board {
   get numTiles() {
     return this._rows * this._columns
   }
+  
+  get playerId() {
+    return this._owner.id;
+  }
 
   makeTiles(boardData) {
     let tileId = 0;
@@ -53,7 +62,8 @@ class Board {
       let x = this.startX;
       for (const tile of row) {
         const position = [x, y, 0];
-        tiles[tileId] = new PlayerBoardTile(tileId, this.tileMesh, position, this)
+        const tileType = tile.typeStack[tile.typeStack.length - 1];
+        tiles[tileId] = new PlayerBoardTile(tileId, this.tileMesh, position, this, tileType);
         tileMatrixRow.push(tileId);
         tileId++;
         x++;
@@ -61,8 +71,8 @@ class Board {
       y++;
       tileMatrix.push(tileMatrixRow);
     }
-    console.log(tileMatrix)
-    return tiles;
+
+    return [tiles, tileMatrix];
   }
 
   makeShips(boardData) {
