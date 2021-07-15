@@ -65,7 +65,7 @@ export default function GameWindow() {
 
   let currentHoverInfo = [];
   for (let key in viewerData.currentHover) {
-    currentHoverInfo.push(<li>{key}: {JSON.stringify(viewerData.currentHover[key])}</li>)
+    currentHoverInfo.push(<li key={key}>{key}: {JSON.stringify(viewerData.currentHover[key])}</li>)
   }
   if(!currentHoverInfo.length) {
     currentHoverInfo = <li>No hoverable detected</li>
