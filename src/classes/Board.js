@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import Ship from './Ship';
 
 import Tiles from './Tile'
 const { Tile, PlayerBoardTile } = Tiles;
@@ -47,9 +48,13 @@ class Board {
   get numTiles() {
     return this._rows * this._columns
   }
-  
+
   get playerId() {
     return this._owner.id;
+  }
+
+  get shipMeshes() {
+    return Object.values(this.ships).map(ship => ship.mesh)
   }
 
   makeTiles(boardData) {
@@ -76,7 +81,13 @@ class Board {
   }
 
   makeShips(boardData) {
-    console.log(boardData.ships)
+    const shipsData = boardData.ships;
+    const ships = {}
+    for (let shipId in shipsData) {
+      ships[shipId] = new Ship(shipsData[shipId])
+    }
+
+    return ships;
   }
 }
 

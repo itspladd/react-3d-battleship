@@ -79,10 +79,8 @@ class GameViewer {
     this.add(game.fillerTiles)
     // Add player boards
     Object.values(game.players).forEach(player => {
-      const tileMesh = player.board.tileMesh;
-      const testMatrix = new THREE.Matrix4();
-      tileMesh.getMatrixAt(2, testMatrix)
       this.add(player.board.tileMesh)
+      this.addArr(player.board.shipMeshes)
     });
   }
 
