@@ -92,6 +92,10 @@ class HoverableTile extends InstancedTile {
       hoverColor: this._hoverColor.getHexString()
     }
   }
+
+  get hoverable() {
+    return true;
+  }
 }
 
 class PlayerBoardTile extends HoverableTile {

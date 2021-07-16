@@ -143,13 +143,15 @@ class GameViewer {
   }
 
   detectHovers() {
-    // Assum no current hover.
+    // Assume no current hover.
     this._currentHovers = [];
     if(this._currentGame) {
-      // TODO: Detect ships
+      const players = Object.values(this._currentGame.players)
 
+      // TODO: Detect ships
+      this._currentHovers = this._currentGame.players.p2.board.shipsArr.filter(ship => ship.currentlyHovered(this._raycaster))
       // Detect tiles
-      Object.values(this._currentGame.players).forEach(player => {
+      players.forEach(player => {
         const boardIntersections = this._raycaster.intersectObject(player.board.tileMesh);
         if (boardIntersections.length > 0) {
           const tile = boardIntersections[0];
@@ -161,7 +163,7 @@ class GameViewer {
     }
     const hovering = this._currentHovers.length > 0;
     if (!hovering) {
-    this._setViewerData(prev => ({ ...prev, currentHover: null }));
+      this._setViewerData(prev => ({ ...prev, currentHover: null }));
     }
     return this._currentHovers.length > 0;
   }

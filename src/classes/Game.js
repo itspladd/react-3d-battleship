@@ -81,6 +81,8 @@ class Game {
   **************************************************/
 
   constructor(gameState, ownerId) {
+    this._ownerId = ownerId;
+
     this.mapDimensions = this.mapDimensions(gameState);
     this.boardBoundaries = this.findPlayerBoundaries(gameState, ownerId)
 
@@ -100,6 +102,10 @@ class Game {
 
   get totalTiles() {
     return this.mapRows * this.mapColumns;
+  }
+
+  get playerShipMeshes() {
+    return this.players[this._ownerId].board.shipMeshes;
   }
 
   initPlayers(gameState, boardBoundaries) {

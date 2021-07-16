@@ -28,6 +28,14 @@ class Ship {
     return this._segmentGroup;
   }
 
+  get segmentMeshes() {
+    return this._segmentGroup.children;
+  }
+
+  get hoverable() {
+    return true;
+  }
+
   set color(color) {
     this._segmentArr.forEach(segment => {
       segment.mesh.material.color = color;
@@ -63,6 +71,10 @@ class Ship {
   placeAtNull() {
     const {x, y, angle} = this._nullPosition;
     Game.positionObject(this.mesh, [x, y, 0 ], angle)
+  }
+
+  currentlyHovered(raycaster) {
+    return raycaster.intersectObjects(this.segmentMeshes).length > 0;
   }
 
   onHover() {

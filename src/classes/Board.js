@@ -27,6 +27,10 @@ class Board {
     return this.tilesById;
   }
 
+  get shipsArr() {
+    return Object.values(this.ships);
+  }
+
   get startX() {
     return this._start[0];
   }
