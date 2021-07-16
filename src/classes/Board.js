@@ -4,6 +4,8 @@ import Ship from './Ship';
 import Tiles from './Tile'
 const { Tile, PlayerBoardTile } = Tiles;
 
+const { SHIP_NULL_START } = require('../constants/3DBOARD').BOARD_DIMENSIONS
+
 class Board {
   constructor(owner, boardData, boundaries) {
     this._owner = owner;
@@ -83,8 +85,13 @@ class Board {
   makeShips(boardData) {
     const shipsData = boardData.ships;
     const ships = {}
+    let nullCounter = 0;
+    const {x, y, angle} = SHIP_NULL_START;
     for (let shipId in shipsData) {
-      ships[shipId] = new Ship(shipsData[shipId])
+      const nullPosition = {x: (2 * nullCounter + x), y, angle};
+      const shipData = { ...shipsData[shipId], nullPosition }
+      ships[shipId] = new Ship(shipData)
+      nullCounter++;
     }
 
     return ships;

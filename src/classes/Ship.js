@@ -1,12 +1,13 @@
 import * as THREE from 'three'
+import Game from './Game'
 
 import { TILE_GEOMETRY, MATERIALS, COLORS } from '../constants/3DBOARD';
+
 const { TILE_HEIGHT, TILE_BASE } = TILE_GEOMETRY;
 
 
 class Ship {
-  constructor(shipData) {
-    const {typeStr, segments, angle, position, id} = shipData;
+  constructor({typeStr, segments, angle, position, nullPosition, id}) {
 
     this._type = typeStr;
     const [segmentArr, segmentGroup] = this.makeSegments(this._type, segments);
@@ -15,6 +16,9 @@ class Ship {
     this._angle = angle;
     this._position = position;
     this._id = id;
+    this._nullPosition = nullPosition;
+
+    this.placeAtNull();
   }
 
   get mesh() {
@@ -45,6 +49,11 @@ class Ship {
     const material = new THREE.MeshBasicMaterial( {color: 0x666666} );
 
     return new THREE.Mesh(segmentGeom, material);
+  }
+
+  placeAtNull() {
+    const {x, y, angle} = this._nullPosition;
+    Game.positionObject(this.mesh, [x, y, 0 ], angle)
   }
 }
 

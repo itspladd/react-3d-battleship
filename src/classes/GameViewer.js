@@ -71,16 +71,21 @@ class GameViewer {
 
   initGame(gameState, ownerId) {
     this._currentGame = new Game(gameState, ownerId);
-    this.addGameToScene(this._currentGame)
+    this.addGameToScene(this._currentGame, ownerId)
   }
 
-  addGameToScene(game) {
+  addGameToScene(game, playerId) {
     // Add filler tiles
     this.add(game.fillerTiles)
-    // Add player boards
+
+    // For every player:
     Object.values(game.players).forEach(player => {
+      // Add the tilemesh for the board to the scene
       this.add(player.board.tileMesh)
-      this.addArr(player.board.shipMeshes)
+
+      // If the player we're looking at matches the player viewing the board,
+      // add their ship meshes to the scene
+      player.id === playerId && this.addArr(player.board.shipMeshes)
     });
   }
 
