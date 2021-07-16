@@ -7,6 +7,10 @@ const { TILE_HEIGHT, TILE_BASE } = TILE_GEOMETRY;
 
 
 class Ship {
+
+  static color = new THREE.Color(0x666666);
+  static hoverColor = new THREE.Color(0x888888);
+
   constructor({typeStr, segments, angle, position, nullPosition, id}) {
 
     this._type = typeStr;
@@ -17,12 +21,17 @@ class Ship {
     this._position = position;
     this._id = id;
     this._nullPosition = nullPosition;
-
     this.placeAtNull();
   }
 
   get mesh() {
     return this._segmentGroup;
+  }
+
+  set color(color) {
+    this._segmentArr.forEach(segment => {
+      segment.mesh.material.color = color;
+    })
   }
 
   makeSegments(type, segments) {
@@ -46,7 +55,7 @@ class Ship {
   makeSegmentMesh(type, index) {
     const segmentLength = TILE_HEIGHT * 2;
     const segmentGeom = new THREE.BoxGeometry( 1, segmentLength, 1)
-    const material = new THREE.MeshBasicMaterial( {color: 0x666666} );
+    const material = new THREE.MeshBasicMaterial( {color: Ship.color} );
 
     return new THREE.Mesh(segmentGeom, material);
   }
@@ -54,6 +63,14 @@ class Ship {
   placeAtNull() {
     const {x, y, angle} = this._nullPosition;
     Game.positionObject(this.mesh, [x, y, 0 ], angle)
+  }
+
+  onHover() {
+    this.color = Ship.hoverColor;
+  }
+
+  onHoverExit() {
+    this.color = Ship.color;
   }
 }
 
