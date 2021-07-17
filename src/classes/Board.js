@@ -1,7 +1,9 @@
 import * as THREE from 'three';
-import Ship from './Ship';
 
+import Game from './Game'
+import Ship from './Ship';
 import Tiles from './Tile'
+
 const { Tile, PlayerBoardTile } = Tiles;
 
 const { SHIP_NULL_START } = require('../constants/3DBOARD').BOARD_DIMENSIONS
@@ -99,6 +101,14 @@ class Board {
     }
 
     return ships;
+  }
+
+  moveShip(id, vector2, angle) {
+    const [relX, relY] = vector2;
+    const x = relX + this.startX;
+    const y = relY + this.startY;
+    console.log('placing ship at ', x, y)
+    Game.positionObject(this.ships[id].mesh, [x, y, 0], angle)
   }
 }
 
