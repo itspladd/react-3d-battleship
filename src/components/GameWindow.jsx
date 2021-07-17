@@ -24,8 +24,8 @@ export default function GameWindow() {
     console.log('handling click')
     const p1Move = {
       moveType: moves.MOVE_SHIP.NAME,
-      playerID: 'p1',
-      targetPlayerID: 'p1',
+      playerID: 'p2',
+      targetPlayerID: 'p2',
       shipID: 'ship0',
       position: [0, 0],
       angle: 180
