@@ -11,9 +11,10 @@ class Ship {
   static color = new THREE.Color(0x666666);
   static hoverColor = new THREE.Color(0x888888);
 
-  constructor({typeStr, segments, angle, position, nullPosition, id}) {
+  constructor({typeStr, segments, angle, position, nullPosition, id, owner}) {
 
     this._type = typeStr;
+    this._owner = owner;
     const [segmentArr, segmentGroup] = this.makeSegments(this._type, segments);
     this._segmentArr = segmentArr;
     this._segmentGroup = segmentGroup;
@@ -22,6 +23,10 @@ class Ship {
     this._id = id;
     this._nullPosition = nullPosition;
     this.placeAtNull();
+  }
+
+  get owner() {
+    return this._owner;
   }
 
   get mesh() {
@@ -66,6 +71,13 @@ class Ship {
     const material = new THREE.MeshBasicMaterial( {color: Ship.color} );
 
     return new THREE.Mesh(segmentGeom, material);
+  }
+
+  placeAt(position, angle) {
+    const [x, y] = position;
+    const absX = x + this.owner.startX;
+    const absY = y + this.owner.startY;
+    Game.positionObject(this.mesh, [absX, absY, 0], angle)
   }
 
   placeAtNull() {

@@ -42,7 +42,7 @@ class Game {
 
   static placeObjectAt(threeObj, x, y, z) {
     const matrix = this.getXYZMatrix(x, y, z);
-    threeObj.applyMatrix4(matrix)
+    threeObj.position.setFromMatrixPosition(matrix)
   }
 
   static getXYZMatrix(x, y, z) {
@@ -214,7 +214,7 @@ class Game {
       const ships = Object.values(board.ships);
       ships.forEach(ship => {
         if(ship.position !== null) {
-          this.players[playerId].board.moveShip(ship.id, ship.position, ship.angle)
+          this.players[playerId].board.ships[ship.id].placeAt(ship.position, ship.angle)
         }
       })
     })
