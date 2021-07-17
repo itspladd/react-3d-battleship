@@ -3,9 +3,10 @@ import { MapControls } from 'three/examples/jsm/controls/OrbitControls'
 import Game from './Game';
 
 class GameViewer {
-  constructor(window, canvasRef, setViewerData) {
+  constructor(window, canvasRef, setViewerData, messageDataRef) {
     this._canvasRef = canvasRef;
     this._setViewerData = setViewerData;
+    this._messageDataRef = messageDataRef;
 
     this._scene = new THREE.Scene();
     this._renderer = new THREE.WebGLRenderer({ canvas: this._canvasRef.current });
@@ -30,6 +31,14 @@ class GameViewer {
     // Binding functions that get called in odd scopes
     this.animate = this.animate.bind(this); // Recursive, so scope changes if unbound
     this.onPointerMove = this.onPointerMove.bind(this); // Called by window, so scope changes
+  }
+
+  get update() {
+    return this._messageDataRef.current.update;
+  }
+
+  set update(flag) {
+    this._messageDataRef.current.update = false;
   }
 
   add(object) {
@@ -69,8 +78,8 @@ class GameViewer {
     return new THREE.Vector2(-1, -1);
   }
 
-  initGame(gameState, ownerId) {
-    this._currentGame = new Game(gameState, ownerId);
+  initGame(gameStateRef, ownerId) {
+    this._currentGame = new Game(gameStateRef, ownerId);
     this.addGameToScene(this._currentGame, ownerId)
   }
 
@@ -137,6 +146,10 @@ class GameViewer {
     // If the board needs to be updated, update the board.
     //TODO: FILL IN
     //
+    if(this.update) {
+      this._currentGame.update()
+      this.update = false;
+    }
 
     this.detectHovers() && this.handleHovers();
     this._renderer.render(this._scene, this._camera);
