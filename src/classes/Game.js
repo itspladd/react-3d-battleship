@@ -80,15 +80,16 @@ class Game {
   END OF STATIC METHODS
   **************************************************/
 
-  constructor(gameState, ownerId) {
+  constructor(gameStateRef, ownerId) {
     this._ownerId = ownerId;
+    this._gameStateRef = gameStateRef;
 
-    this.mapDimensions = this.mapDimensions(gameState);
-    this.boardBoundaries = this.findPlayerBoundaries(gameState, ownerId)
+    this.mapDimensions = this.mapDimensions(this.currentState);
+    this.boardBoundaries = this.findPlayerBoundaries(this.currentState, ownerId)
 
     // Players create Boards during construction.
     // Boards include Tiles and Ships, so look in Board.js for Tile/Ship init.
-    this.players = this.initPlayers(gameState, this.boardBoundaries);
+    this.players = this.initPlayers(this.currentState, this.boardBoundaries);
     this.fillerTiles = this.initFillerTiles();
   }
 
@@ -106,6 +107,10 @@ class Game {
 
   get playerShipMeshes() {
     return this.players[this._ownerId].board.shipMeshes;
+  }
+
+  get currentState() {
+    return this._gameStateRef.current;
   }
 
   initPlayers(gameState, boardBoundaries) {
@@ -198,6 +203,21 @@ class Game {
     const totalRows = playerRows + ROWS_TOP + ROWS_BOTTOM;
     const totalCols = playerCols + spacerColsTotal + COLUMNS_LEFT + COLUMNS_RIGHT;
     return [totalRows, totalCols]
+  }
+
+  update() {
+    console.log(this.currentState)
+    //Reposition every element on the board
+    Object.values(this.currentState.players).forEach(player => {
+      const playerId = player.id;
+      const board = player.board;
+      const ships = Object.values(board.ships);
+      ships.forEach(ship => {
+        if(ship.position !== null) {
+          this.players[playerId].board.moveShip(ship.id, ship.position, ship.angle)
+        }
+      })
+    })
   }
 }
 
