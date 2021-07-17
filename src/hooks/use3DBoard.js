@@ -27,7 +27,7 @@ export default function use3DBoard(canvasRef, gameStateRef) {
       hoverable: null
     }
   });
-  const messageData = useRef({ update: false, timestamp: Date.now() });
+  const messageDataRef = useRef({ update: false, timestamp: Date.now() });
   //console.log('refreshing?')
 
   useEffect(() => {
@@ -36,16 +36,15 @@ export default function use3DBoard(canvasRef, gameStateRef) {
     //hlp3.positionObject(gameBoard.ships[0], [10, 10], 120)
 
 
-    const viewer = new GameViewer(window, canvasRef, setViewerData)
+    const viewer = new GameViewer(window, canvasRef, setViewerData, messageDataRef)
     window.addEventListener('mousemove', viewer.onPointerMove, false);
-    viewer.initGame(gameStateRef.current, playerId)
-    console.log(viewer._scene.children)
+    viewer.initGame(gameStateRef, playerId)
 
     viewer.animate();
     // === THREE.JS CODE END ===
   }, [])
 
-  return [viewerData, messageData]
+  return [viewerData, messageDataRef]
 }
 
 const updateBoard = (gameState) => {
