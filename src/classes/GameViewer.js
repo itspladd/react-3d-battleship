@@ -178,7 +178,7 @@ class GameViewer {
     if (!hovering) {
       this._setViewerData(prev => ({ ...prev, currentHover: null }));
     }
-    return this._currentHovers.length > 0;
+    return this._currentHovers.length > 0 || this._prevHovers.length > 0;
   }
 
   handleHovers() {

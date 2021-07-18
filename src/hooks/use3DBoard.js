@@ -9,6 +9,7 @@ import GameViewer from '../classes/GameViewer'
 export default function use3DBoard(canvasRef, gameStateRef) {
   // DEV - REMOVE LATER
   const playerId = 'p2';
+  /************ END DEV DATA*/
 
   const [viewerData, setViewerData] = useState({
     pointer: {

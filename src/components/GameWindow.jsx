@@ -18,7 +18,16 @@ export default function GameWindow() {
 
 
   const [engine, moves, gameStateRef, makeMove] = useGameEngine();
-  const [viewerData, messageData] = use3DBoard(renderCanvas, gameStateRef);
+  const [viewerData, messageDataRef] = use3DBoard(renderCanvas, gameStateRef);
+  const [status, setStatus] = useState('Waiting');
+
+  const moveAndUpdate = (move) => {
+    setStatus('Move sent. Waiting for engine...');
+    makeMove(move)
+      .then(success => setStatus(`Move handled. Results: ${success && 'Valid'}. Updating board...`))
+      .then(() => console.log(gameStateRef.current))
+      .then(() => messageDataRef.current.update = true)
+  }
 
   const handleClick = () => {
     console.log('handling click')
@@ -30,8 +39,8 @@ export default function GameWindow() {
       position: [0, 0],
       angle: 180
     }
-    makeMove(p1Move)
-      .then(results => console.log('move done. results:', results))
+    moveAndUpdate(p1Move)
+
   }
 
   const shipList = [];
@@ -73,9 +82,10 @@ export default function GameWindow() {
 
   return (
     <div className="game-window">
+      <div id="status">Status: {status}</div>
       <div id="info">
         <h2>Debug panel</h2>
-        <p>Board update: {` ${messageData.current.update}, ${messageData.current.timestamp}`}</p>
+        <p>Board update: {` ${messageDataRef.current.update}, ${messageDataRef.current.timestamp}`}</p>
         <ul>
           <li>Mouse: {mouseDataText}</li>
           <li>Camera pos: {cameraPosText}</li>
@@ -85,7 +95,6 @@ export default function GameWindow() {
           {currentHoverInfo}
         </ul>
         <button onClick={() => handleClick()}>Place a ship</button>
-        <button onClick={() => messageData.current.update = true}>Tell board to update</button>
         {shipList}
         {engine && `Engine timestamp: ${engine.timestamp}`}
       </div>

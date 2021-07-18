@@ -17,3 +17,14 @@
   background-color: #333333;
   color: #dddddd
 }
+
+#status {
+  position: absolute;
+  font-family: monospace;
+  top: 10px;
+  left: 50%;
+  text-align: center;
+  z-index: 100;
+  display: block;
+  color: #ff0000
+}

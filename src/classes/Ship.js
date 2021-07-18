@@ -10,6 +10,7 @@ class Ship {
 
   static color = new THREE.Color(0x666666);
   static hoverColor = new THREE.Color(0x888888);
+  static zOffset = TILE_BASE;
 
   constructor({typeStr, segments, angle, position, nullPosition, id, owner}) {
 
@@ -39,6 +40,13 @@ class Ship {
 
   get hoverable() {
     return true;
+  }
+
+  get hoverData() {
+    return {
+      id: this._id,
+      position: this._position
+    }
   }
 
   set color(color) {
@@ -77,12 +85,12 @@ class Ship {
     const [x, y] = position;
     const absX = x + this.owner.startX;
     const absY = y + this.owner.startY;
-    Game.positionObject(this.mesh, [absX, absY, 0], angle)
+    Game.positionObject(this.mesh, [absX, absY, -Ship.zOffset], angle)
   }
 
   placeAtNull() {
     const {x, y, angle} = this._nullPosition;
-    Game.positionObject(this.mesh, [x, y, 0 ], angle)
+    Game.positionObject(this.mesh, [x, y, Ship.zOffset ], angle)
   }
 
   currentlyHovered(raycaster) {
