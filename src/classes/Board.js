@@ -17,7 +17,7 @@ class Board {
     this._rows = boardData.rows;
     this._columns = boardData.columns;
     this.tileMesh = new THREE.InstancedMesh(Tile.geometry, Tile.material, this.numTiles)
-
+    this.tileMesh.frustumCulled = false;
     const [tilesById, tilesByPosition] = this.makeTiles(boardData);
     this.tilesById = tilesById;
     this.tilesByPosition = tilesByPosition;

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { MapControls } from 'three/examples/jsm/controls/OrbitControls'
+import { BattleshipControls } from './BattleshipControls'
 import Game from './Game';
 
 class GameViewer {
@@ -53,6 +53,7 @@ class GameViewer {
 
   setupCamera() {
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.up = new THREE.Vector3(0, 0, 1)
     camera.position.z = 20;
     camera.position.y = 0;
     camera.position.x = 0;
@@ -62,14 +63,7 @@ class GameViewer {
   }
 
   setupControls() {
-    const controls = new MapControls(this._camera, this._canvasRef.current)
-    controls.screenSpacePanning = true;
-
-    // Put angle limits on the camera movement
-    controls.maxAzimuthAngle = 0;
-    controls.minAzimuthAngle = 0;
-    controls.maxPolarAngle = Math.PI * .8;
-    controls.minPolarAngle = Math.PI / 2;
+    const controls = new BattleshipControls(this._camera, this._canvasRef.current)
 
     return controls
   }

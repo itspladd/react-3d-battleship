@@ -227,7 +227,6 @@ class Game {
   }
 
   update() {
-    console.log(this.currentState)
     //Reposition every element on the board
     Object.values(this.currentState.players).forEach(player => {
       const playerId = player.id;
