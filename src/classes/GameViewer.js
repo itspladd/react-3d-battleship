@@ -10,7 +10,6 @@ class GameViewer {
 
     this._scene = new THREE.Scene();
     this._renderer = new THREE.WebGLRenderer({ canvas: this._canvasRef.current });
-    this._raycaster = new THREE.Raycaster();
     this._camera = this.setupCamera();
     this._controls = this.setupControls();
 
@@ -18,10 +17,8 @@ class GameViewer {
     this._renderer.setSize(window.innerWidth, window.innerHeight);
     this._lights = this.setupLights();
     this._axes = this.makeAxes();
-    this._pointer = this.setupPointer();
 
-    this._currentHovers = [];
-    this._prevHovers = [];
+
 
 
     // Add initial stuff to scene
@@ -30,11 +27,18 @@ class GameViewer {
 
     // Binding functions that get called in odd scopes
     this.animate = this.animate.bind(this); // Recursive, so scope changes if unbound
-    this.onPointerMove = this.onPointerMove.bind(this); // Called by window, so scope changes
+  }
+
+  get controls() {
+    return this._controls;
   }
 
   get update() {
     return this._messageDataRef.current.update;
+  }
+
+  get game() {
+    return this._currentGame;
   }
 
   set update(flag) {
@@ -63,18 +67,18 @@ class GameViewer {
   }
 
   setupControls() {
-    const controls = new BattleshipControls(this._camera, this._canvasRef.current)
+    const controls = new BattleshipControls(this._camera, this._canvasRef.current, this._setViewerData)
 
     return controls
   }
 
-  setupPointer() {
-    return new THREE.Vector2(-1, -1);
-  }
+
 
   initGame(gameStateRef, ownerId) {
-    this._currentGame = new Game(gameStateRef, ownerId);
-    this.addGameToScene(this._currentGame, ownerId)
+    const game = new Game(gameStateRef, ownerId);
+    this._currentGame = game;
+    this.controls.game = game;
+    this.addGameToScene(game, ownerId)
   }
 
   addGameToScene(game, playerId) {
@@ -112,30 +116,9 @@ class GameViewer {
     return new THREE.AxesHelper(5);
   }
 
-  onPointerMove(event) {
-    //calculate mouse position
-    this._pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-    this._pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
-    const pointer = {
-      normalizedPosition: [this._pointer.x, this._pointer.y],
-      rawPosition: [event.clientX, event.clientY]
-    }
-    const cam = {
-      position: this._camera.position,
-      rotation: this._camera.quaternion
-    }
-    this._setViewerData(prev => ({
-      ...prev,
-      pointer,
-      camera: cam
-    }))
-
-
-  }
-
   animate() {
     requestAnimationFrame(this.animate);
-    this._raycaster.setFromCamera(this._pointer, this._camera)
+    this.controls.handleAnimationLoop();
 
     // If the board needs to be updated, update the board.
     //TODO: FILL IN
@@ -145,48 +128,7 @@ class GameViewer {
       this.update = false;
     }
 
-    this.detectHovers() && this.handleHovers();
     this._renderer.render(this._scene, this._camera);
-  }
-
-  detectHovers() {
-    // Assume no current hover.
-    this._currentHovers = [];
-    if(this._currentGame) {
-      const players = Object.values(this._currentGame.players)
-
-      // TODO: Detect ships
-      this._currentHovers = this._currentGame.players.p2.board.shipsArr.filter(ship => ship.currentlyHovered(this._raycaster))
-      // Detect tiles
-      players.forEach(player => {
-        const boardIntersections = this._raycaster.intersectObject(player.board.tileMesh);
-        if (boardIntersections.length > 0) {
-          const tile = boardIntersections[0];
-
-          // Add tile object to current hover list
-          this._currentHovers.push(player.board.tiles[tile.instanceId])
-        }
-      })
-    }
-    const hovering = this._currentHovers.length > 0;
-    if (!hovering) {
-      this._setViewerData(prev => ({ ...prev, currentHover: null }));
-    }
-    return this._currentHovers.length > 0 || this._prevHovers.length > 0;
-  }
-
-  handleHovers() {
-    // If we were already hovering over any items...
-    // Find new hovers and abandoned hovers.
-    const newHovers = this._prevHovers.filter(prevHoverable => this._currentHovers.includes(prevHoverable));
-    const abandonedHovers = this._prevHovers.filter(prevHoverable => !this._currentHovers.includes(prevHoverable));
-
-    newHovers.forEach(hoverable => hoverable.onHover());
-    abandonedHovers.forEach(hoverable => hoverable.onHoverExit());
-
-    const currentHover = this._currentHovers.map(hoverable => hoverable.hoverData)[0]
-    this._setViewerData(prev => ({ ...prev, currentHover }));
-    this._prevHovers = this._currentHovers;
   }
 
   // Create a simple green cube for dev/test purposes.

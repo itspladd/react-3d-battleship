@@ -38,7 +38,6 @@ export default function use3DBoard(canvasRef, gameStateRef) {
 
 
     const viewer = new GameViewer(window, canvasRef, setViewerData, messageDataRef)
-    window.addEventListener('mousemove', viewer.onPointerMove, false);
     viewer.initGame(gameStateRef, playerId)
 
     viewer.animate();

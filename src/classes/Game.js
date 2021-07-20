@@ -134,6 +134,24 @@ class Game {
     return this._gameStateRef.current;
   }
 
+  get owningPlayer() {
+    return this.players[this._ownerId];
+  }
+  
+  get playersArr() {
+    return Object.values(this.players);
+  }
+
+  get hoverables() {
+    const playerShips = this.owningPlayer.board.shipsArr;
+    const boards = this.playersArr.map(player => player.board)
+    return [...playerShips, ...boards]
+  }
+
+  get selectables() {
+
+  }
+
   initPlayers(gameState, boardBoundaries) {
     const players = {}
     for (let id in gameState.players) {
@@ -148,6 +166,7 @@ class Game {
 
   initFillerTiles() {
     const fillerTileMesh = new THREE.InstancedMesh(Tile.geometry, Tile.material, this.totalTiles)
+    fillerTileMesh.frustumCulled = false;
     const fillerTiles = {};
     let tileCounter = 0;
 

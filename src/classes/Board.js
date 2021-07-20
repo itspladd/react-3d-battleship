@@ -111,6 +111,21 @@ class Board {
     console.log('placing ship at ', x, y)
     Game.positionObject(this.ships[id].mesh, [x, y, 0], angle)
   }
+
+  currentHover(raycaster) {
+    const hover = raycaster.intersectObject(this.tileMesh)[0];
+    return hover && this.tiles[hover.instanceId];
+  }
+
+  onHover() {
+    //console.log(raycaster.intersectObject(this.tileMesh)[0]);
+
+  }
+
+  onHoverExit() {
+    //console.log(raycaster.intersectObject(this.tileMesh)[0]);
+
+  }
 }
 
 export default Board;

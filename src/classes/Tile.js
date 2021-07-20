@@ -70,6 +70,10 @@ class HoverableTile extends InstancedTile {
     this._hoverColor = hoverColor;
   }
 
+  currentlyHovered(raycaster) {
+    return raycaster.intersectObject(this._mesh)[0].instanceId === this.id;
+  }
+
   onHover() {
     this.color = this._hoverColor;
     this._mesh.instanceColor.needsUpdate = true;

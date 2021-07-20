@@ -93,8 +93,9 @@ class Ship {
     Game.positionObject(this.mesh, [x, y, Ship.zOffset ], angle)
   }
 
-  currentlyHovered(raycaster) {
-    return raycaster.intersectObjects(this.segmentMeshes).length > 0;
+  currentHover(raycaster) {
+    console.log(raycaster.intersectObjects(this.mesh).length > 0)
+    return raycaster.intersectObjects(this.segmentMeshes).length > 0 && this;
   }
 
   onHover() {
