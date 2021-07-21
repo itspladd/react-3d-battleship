@@ -26,6 +26,11 @@ export default function use3DBoard(canvasRef, gameStateRef) {
       worldPosition: null, // Position on the overall visible world
       boardPosition: null, // Position on the owning player's board
       hoverable: null
+    },
+    currentSelect: {
+      objectId: 'none',
+      playerId: null,
+      ownerId: null,
     }
   });
   const messageDataRef = useRef({ update: false, timestamp: Date.now() });

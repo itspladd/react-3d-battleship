@@ -10,6 +10,8 @@ class BattleshipControls extends MapControls {
 
     this._currentHovers = [];
     this._prevHovers = [];
+    this._currentSelected = [];
+    this._prevSelected = [];
 
     this._pointer = this.setupPointer();
     // Put angle limits on the camera movement
@@ -19,7 +21,11 @@ class BattleshipControls extends MapControls {
     this.minPolarAngle = 0;
 
     this.onPointerMove = this.onPointerMove.bind(this); // Called by window, so scope changes
+    this.onPointerDown = this.onPointerDown.bind(this); // Called by window, so scope changes
+    this.onPointerUp = this.onPointerUp.bind(this); // Called by window, so scope changes
     domElement.addEventListener('mousemove', this.onPointerMove, false);
+    domElement.addEventListener('pointerdown', this.onPointerDown, false);
+    domElement.addEventListener('pointerup', this.onPointerUp, false);
   }
 
   get camera() {
@@ -34,6 +40,23 @@ class BattleshipControls extends MapControls {
     return this._game;
   }
 
+  get pointerDelta() {
+    return Date.now() - this._pointerDownTime;
+  }
+
+  get selection() {
+    return this._currentSelected[0];
+  }
+  
+  set selection(obj) {
+    this._currentSelected.push(obj)
+  }
+
+  deselect() {
+    this.selection.onDeselect();
+    this._currentSelected.pop();
+  }
+
   handleAnimationLoop() {
     this._raycaster.setFromCamera(this._pointer, this.camera)
     this.detectHovers() && this.handleHovers();
@@ -44,7 +67,7 @@ class BattleshipControls extends MapControls {
   }
 
   onPointerMove(event) {
-    //calculate mouse position
+    //calculate mouse position and save it
     this._pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
     this._pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
     const pointer = {
@@ -60,41 +83,50 @@ class BattleshipControls extends MapControls {
       pointer,
       camera: cam
     }))
+  }
 
+  onPointerDown(event) {
+    event.preventDefault();
+
+    // Save the timestamp for this click to calculate click duration
+    this._pointerDownTime = Date.now();
+
+    // Find out what was clicked on
+    if(this.game) {
+      // Find the selectable item that was clicked on
+      this._potentialSelect = this._currentHovers
+        .filter(hoverable => this.game.selectables.includes(hoverable))
+        .pop();
+      
+      this.selection && this.deselect();
+    }
+  }
+
+  onPointerUp(event) {
+    event.preventDefault();
+    
+    if(this._potentialSelect && this.pointerDelta < 500) {
+      this.selection = this._potentialSelect;
+      this.selection.onSelect();
+      this._potentialSelect = null;
+    }
   }
 
   // Returns true if there are any current hovers or any previous hovers.
   detectHovers() {
     // Assume no current hover.
-
     this._currentHovers = [];
-/*     if(this._currentGame) {
-      const players = Object.values(this._currentGame.players)
-
-      // TODO: Detect ships
-      this._currentHovers = this._currentGame.players.p2.board.shipsArr.filter(ship => ship.currentlyHovered(this._raycaster))
-      // Detect tiles
-      players.forEach(player => {
-        const boardIntersections = this._raycaster.intersectObject(player.board.tileMesh);
-        if (boardIntersections.length > 0) {
-          const tile = boardIntersections[0];
-
-          // Add tile object to current hover list
-          this._currentHovers.push(player.board.tiles[tile.instanceId])
-        }
-      })
-    } */
     if(this.game) {
-      this._currentHovers = this.game.hoverables.map(h => h.currentHover(this._raycaster))
-      console.log(this._currentHovers)
-      this._currentHovers = this._currentHovers.filter(h => !!h)
-      console.log(this._currentHovers)
+      this._currentHovers = this.game.hoverables
+        .map(h => h.currentHover(this._raycaster)) // Get hovered objects
+        .filter(h => !!h) // Filter out falsy values like undefined or false
     }
     const hovering = this._currentHovers.length > 0;
+    const prevHovering = this._prevHovers.length > 0
     if (!hovering) {
       this.setViewerData(prev => ({ ...prev, currentHover: null }));
     }
-    return this._currentHovers.length > 0 || this._prevHovers.length > 0;
+    return hovering || prevHovering;
   }
 
   handleHovers() {
@@ -102,9 +134,9 @@ class BattleshipControls extends MapControls {
     // Find new hovers and abandoned hovers.
     const newHovers = this._prevHovers.filter(prevHoverable => this._currentHovers.includes(prevHoverable));
     const abandonedHovers = this._prevHovers.filter(prevHoverable => !this._currentHovers.includes(prevHoverable));
-    console.log(newHovers)
-    newHovers.forEach(hoverable => hoverable.onHover());
-    abandonedHovers.forEach(hoverable => hoverable.onHoverExit());
+    //If any of the hovers are selected, we don't do hover behavior.
+    newHovers.forEach(hoverable => !hoverable.selected && hoverable.onHover());
+    abandonedHovers.forEach(hoverable => !hoverable.selected && hoverable.onHoverExit());
 
     const currentHover = this._currentHovers.map(hoverable => hoverable.hoverData)[0]
     this.setViewerData(prev => ({ ...prev, currentHover }));

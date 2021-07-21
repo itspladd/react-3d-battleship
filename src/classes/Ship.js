@@ -10,7 +10,7 @@ class Ship {
 
   static color = new THREE.Color(0x666666);
   static hoverColor = new THREE.Color(0x888888);
-  static zOffset = TILE_BASE;
+  static zOffset = 1 + TILE_BASE;
 
   constructor({typeStr, segments, angle, position, nullPosition, id, owner}) {
 
@@ -23,6 +23,9 @@ class Ship {
     this._position = position;
     this._id = id;
     this._nullPosition = nullPosition;
+    this._selected = false;
+    this._hovered = false;
+    this._sticky = true;
     this.placeAtNull();
   }
 
@@ -42,11 +45,67 @@ class Ship {
     return true;
   }
 
+  get hovered() {
+    return this._hovered;
+  }
+
+  get selected() {
+    return this._selected;
+  }
+
+  get sticky() {
+    return this._sticky;
+  }
+
+  get boardX() {
+    return this._position[0];
+  }
+
+  get boardY() {
+    return this._position[1];
+  }
+
+  get boardPosition() {
+    return this._position;
+  }
+
+  get spaceX() {
+
+  }
+
+  get spaceY() {
+
+  }
+
+  get spacePosition() {
+
+  }
+
   get hoverData() {
     return {
       id: this._id,
-      position: this._position
+      position: this._position,
+      angle: this._angle,
+      nullPosition: this._nullPosition,
+      type: this._type,
+
     }
+  }
+
+  set boardPosition(vector2) {
+    this._position = [...vector2];
+  }
+
+  set angle(deg) {
+
+  }
+
+  set boardX(num) {
+    this._position[0] = num;
+  }
+
+  set boardY(num) {
+    this._position[1] = num;
   }
 
   set color(color) {
@@ -82,27 +141,40 @@ class Ship {
   }
 
   placeAt(position, angle) {
-    const [x, y] = position;
-    const absX = x + this.owner.startX;
-    const absY = y + this.owner.startY;
-    Game.positionObject(this.mesh, [absX, absY, -Ship.zOffset], angle)
+    this.boardPosition = position;
+    this._angle = angle;
+    const absX = this.boardX + this.owner.startX;
+    const absY = this.boardY + this.owner.startY;
+    Game.positionObject(this.mesh, [absX, absY, Ship.zOffset], this._angle)
   }
 
   placeAtNull() {
     const {x, y, angle} = this._nullPosition;
+    this._angle = angle;
     Game.positionObject(this.mesh, [x, y, Ship.zOffset ], angle)
   }
 
   currentHover(raycaster) {
-    console.log(raycaster.intersectObjects(this.mesh).length > 0)
     return raycaster.intersectObjects(this.segmentMeshes).length > 0 && this;
   }
 
   onHover() {
+    this._hovered = true;
     this.color = Ship.hoverColor;
   }
 
   onHoverExit() {
+    this._hovered = false;
+    this.color = Ship.color;
+  }
+
+  onSelect() {
+    this._selected = true;
+    this.color = Ship.hoverColor;
+  }
+
+  onDeselect() {
+    this._selected = false;
     this.color = Ship.color;
   }
 }

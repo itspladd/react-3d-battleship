@@ -149,7 +149,8 @@ class Game {
   }
 
   get selectables() {
-
+    const playerShips = this.owningPlayer.board.shipsArr;
+    return [...playerShips]
   }
 
   initPlayers(gameState, boardBoundaries) {
