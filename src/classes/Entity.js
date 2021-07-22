@@ -38,6 +38,7 @@ class Entity {
   }
 
   get angle() {
+    // In degrees because I'm nasty. sorry
     const zQuat = new THREE.Quaternion(0, 0, 0, 1)
     return Math.round((this._mesh.quaternion.angleTo(zQuat) * 360) / (2 * Math.PI))
   }
@@ -65,6 +66,7 @@ class Entity {
 
   // Given an integer X and Y and optional Z
   set boardPosition(vector3) {
+    console.log('setting board position at', vector3)
     const [x, y, z] = vector3;
 
     // meshX is just number of tiles times x per tile
@@ -73,7 +75,7 @@ class Entity {
     // If the column is odd (x%2 = 1), add the extra offset to y value
     // (because of how hex grids work)
     // It's also negative bc we move downward from the origin
-    const meshY = -1 * y * Entity.yPerTile + ((x % 2) * Entity.oddColumnOffset);
+    const meshY = -1 * (y * Entity.yPerTile + ((x % 2) * Entity.oddColumnOffset));
 
     // If z is non-zero falsy (i.e. not provided), set it to default;
     // otherwise save it.

@@ -3,7 +3,7 @@ import { BattleshipControls } from './BattleshipControls'
 import Game from './Game';
 
 class GameViewer {
-  constructor(window, canvasRef, setViewerData, messageDataRef) {
+  constructor(window, canvasRef, setViewerData, messageDataRef, setMoveData) {
     this._canvasRef = canvasRef;
     this._setViewerData = setViewerData;
     this._messageDataRef = messageDataRef;
@@ -11,7 +11,7 @@ class GameViewer {
     this._scene = new THREE.Scene();
     this._renderer = new THREE.WebGLRenderer({ canvas: this._canvasRef.current });
     this._camera = this.setupCamera();
-    this._controls = this.setupControls();
+    this._controls = this.setupControls(setMoveData);
 
 
     this._renderer.setSize(window.innerWidth, window.innerHeight);
@@ -66,8 +66,8 @@ class GameViewer {
     return camera;
   }
 
-  setupControls() {
-    const controls = new BattleshipControls(this._camera, this._canvasRef.current, this._setViewerData)
+  setupControls(setMoveData) {
+    const controls = new BattleshipControls(this._camera, this._canvasRef.current, this._setViewerData, setMoveData)
 
     return controls
   }

@@ -55,12 +55,16 @@ class Ship extends Entity {
     this._nullPosition = nullPosition;
     this._selected = false;
     this._hovered = false;
-    this._sticky = true;
+    this._placed = false;
     this.placeAtNull();
   }
 
   get owner() {
     return this._owner;
+  }
+
+  get id() {
+    return this._id;
   }
 
   get segmentMeshes() {
@@ -75,8 +79,8 @@ class Ship extends Entity {
     return this._selected;
   }
 
-  get sticky() {
-    return this._sticky;
+  get placed() {
+    return this._placed;
   }
 
   get hoverData() {
@@ -132,7 +136,12 @@ class Ship extends Entity {
   onDeselect() {
     this._selected = false;
     this.color = Ship.color;
-    this.boardZ = Ship.nullZOffset;
+    !this.placed && this.placeAtNull();
+  }
+
+  onPlace() {
+    this.boardZ = Ship.zOffset
+    this._placed = true;
   }
 
   canMoveTo(target) {

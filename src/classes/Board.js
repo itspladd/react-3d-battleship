@@ -105,6 +105,7 @@ class Board {
   }
 
   moveShip(id, vector2) {
+    console.log('board moving ship to', vector2)
     const [relX, relY] = vector2;
     const x = relX + this.startX;
     const y = relY + this.startY;

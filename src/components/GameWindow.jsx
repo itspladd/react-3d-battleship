@@ -18,7 +18,7 @@ export default function GameWindow() {
 
 
   const [engine, moves, gameStateRef, makeMove] = useGameEngine();
-  const [viewerData, messageDataRef] = use3DBoard(renderCanvas, gameStateRef);
+  const [viewerData, messageDataRef, moveData] = use3DBoard(renderCanvas, gameStateRef);
   const [status, setStatus] = useState('Waiting');
 
   const moveAndUpdate = (move) => {
@@ -28,6 +28,10 @@ export default function GameWindow() {
       .then(() => console.log(gameStateRef.current))
       .then(() => messageDataRef.current.update = true)
   }
+
+  useEffect(() => {
+    moveData && moveAndUpdate(moveData) && console.log('sending a move');
+  }, [moveData])
 
   const handleClick = () => {
     console.log('handling click')

@@ -9,10 +9,11 @@ const { MOVES } = require('@itspladd/battleship-engine').CONSTANTS.RULES.DEFAULT
 
 
 class BattleshipControls extends MapControls {
-  constructor( camera, domElement, setViewerData ) {
+  constructor( camera, domElement, setViewerData, setMoveData ) {
     super( camera, domElement );
     this._raycaster = new THREE.Raycaster();
     this.setViewerData = setViewerData;
+    this.setMoveData = setMoveData;
 
     this._currentHovers = [];
     this._prevHovers = [];
@@ -114,6 +115,11 @@ class BattleshipControls extends MapControls {
     if(this.pointerDelta < 500) {
       // If we already have something selected...
       if(this.selection) {
+        const placementTargets = this._currentHovers.filter(hoverable => this.selection.canMoveTo(hoverable))
+        if(placementTargets.length > 0) {
+          this.selection.onPlace();
+          
+        }
         this.deselect();
       }
 
@@ -162,15 +168,15 @@ class BattleshipControls extends MapControls {
 
     const selection = this.selection;
     if(selection && selection.canMoveTo(hoverable)) {
-      console.log("move target logged for hoverable:", hoverable)
       const moveToMake = {
         moveType: MOVES.MOVE_SHIP.NAME,
-        playerId: selection.owner.playerId,
-        targetPlayerId: selection.owner.playerId,
+        playerID: selection.owner.playerId,
+        targetPlayerID: selection.owner.playerId,
         shipID: selection.id,
         position: hoverable.boardPosition,
         angle: selection.angle
       }
+      this.setMoveData(moveToMake)
     }
   }
 }
