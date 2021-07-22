@@ -47,7 +47,7 @@ class BattleshipControls extends MapControls {
   get selection() {
     return this._currentSelected[0];
   }
-  
+
   set selection(obj) {
     this._currentSelected.push(obj)
   }
@@ -138,16 +138,20 @@ class BattleshipControls extends MapControls {
   handleHovers() {
     // If we were already hovering over any items...
     // Find new hovers and abandoned hovers.
-    const newHovers = this._prevHovers.filter(prevHoverable => this._currentHovers.includes(prevHoverable));
+    const newHovers = this._currentHovers.filter(currentHoverable => !this._prevHovers.includes(currentHoverable));
     const abandonedHovers = this._prevHovers.filter(prevHoverable => !this._currentHovers.includes(prevHoverable));
 
     //If any of the hovers are selected, we don't do hover behavior for that entity.
-    newHovers.forEach(hoverable => !hoverable.selected && hoverable.onHover());
+    newHovers.forEach(this.handleNewHovers);
     abandonedHovers.forEach(hoverable => !hoverable.selected && hoverable.onHoverExit());
 
     const currentHover = this._currentHovers.map(hoverable => hoverable.hoverData)[0]
-    this.setViewerData(prev => ({ ...prev, currentHover }));
+    this.setViewerData(prev => ({ ...prev, currentHover, newHovers }));
     this._prevHovers = this._currentHovers;
+  }
+
+  handleNewHovers(hoverable) {
+    !hoverable.selected && hoverable.onHover();
   }
 }
 
