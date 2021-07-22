@@ -93,22 +93,28 @@ class BattleshipControls extends MapControls {
 
     // Find out what was clicked on
     if(this.game) {
-      // Find the selectable item that was clicked on
+      // Find selectable items that were clicked on
       this._potentialSelect = this._currentHovers
         .filter(hoverable => this.game.selectables.includes(hoverable))
         .pop();
-      
-      this.selection && this.deselect();
     }
   }
 
   onPointerUp(event) {
     event.preventDefault();
     
-    if(this._potentialSelect && this.pointerDelta < 500) {
-      this.selection = this._potentialSelect;
-      this.selection.onSelect();
-      this._potentialSelect = null;
+    // If we did a fast click (i.e. not a drag for camera controls)...
+    if(this.pointerDelta < 500) {
+      // If we already have something selected...
+      if(this.selection) {
+        this.deselect();
+      }
+
+      if(this._potentialSelect) {
+        this.selection = this._potentialSelect;
+        this.selection.onSelect();
+        this._potentialSelect = null;
+      }
     }
   }
 
@@ -134,7 +140,8 @@ class BattleshipControls extends MapControls {
     // Find new hovers and abandoned hovers.
     const newHovers = this._prevHovers.filter(prevHoverable => this._currentHovers.includes(prevHoverable));
     const abandonedHovers = this._prevHovers.filter(prevHoverable => !this._currentHovers.includes(prevHoverable));
-    //If any of the hovers are selected, we don't do hover behavior.
+
+    //If any of the hovers are selected, we don't do hover behavior for that entity.
     newHovers.forEach(hoverable => !hoverable.selected && hoverable.onHover());
     abandonedHovers.forEach(hoverable => !hoverable.selected && hoverable.onHoverExit());
 

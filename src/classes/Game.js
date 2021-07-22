@@ -250,11 +250,14 @@ class Game {
     //Reposition every element on the board
     Object.values(this.currentState.players).forEach(player => {
       const playerId = player.id;
-      const board = player.board;
-      const ships = Object.values(board.ships);
-      ships.forEach(ship => {
-        if(ship.position !== null) {
-          this.players[playerId].board.ships[ship.id].placeAt(ship.position, ship.angle)
+      const engineBoard = player.board;
+      const engineShips = Object.values(engineBoard.ships);
+      const viewerBoard = this.players[playerId].board
+      const viewerShips = viewerBoard.ships
+      engineShips.forEach(engineShip => {
+        if(engineShip.position !== null) {
+          viewerBoard.moveShip(engineShip.id, engineShip.position);
+          viewerShips[engineShip.id].angle = engineShip.angle;
         }
       })
     })

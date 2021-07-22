@@ -104,12 +104,12 @@ class Board {
     return ships;
   }
 
-  moveShip(id, vector2, angle) {
+  moveShip(id, vector2) {
     const [relX, relY] = vector2;
     const x = relX + this.startX;
     const y = relY + this.startY;
     console.log('placing ship at ', x, y)
-    Game.positionObject(this.ships[id].mesh, [x, y, 0], angle)
+    this.ships[id].boardPosition = [x, y];
   }
 
   currentHover(raycaster) {
