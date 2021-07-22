@@ -7,12 +7,19 @@ const COLUMNS_LEFT = 4;
 const COLUMNS_RIGHT = 4;
 const COLUMNS_BETWEEN = 2;
 
+const SHIP_NULL_START = {
+  x: 0,
+  y: -1,
+  angle: 60
+}
+
 const BOARD_DIMENSIONS = {
   ROWS_TOP,
   ROWS_BOTTOM,
   COLUMNS_LEFT,
   COLUMNS_RIGHT,
-  COLUMNS_BETWEEN
+  COLUMNS_BETWEEN,
+  SHIP_NULL_START
 }
 
 /**********************************/

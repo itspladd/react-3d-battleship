@@ -18,20 +18,33 @@ export default function GameWindow() {
 
 
   const [engine, moves, gameStateRef, makeMove] = useGameEngine();
-  const [interactionData, messageData] = use3DBoard(renderCanvas, gameStateRef);
+  const [viewerData, messageDataRef, moveData] = use3DBoard(renderCanvas, gameStateRef);
+  const [status, setStatus] = useState('Waiting');
+
+  const moveAndUpdate = (move) => {
+    setStatus('Move sent. Waiting for engine...');
+    makeMove(move)
+      .then(success => setStatus(`Move handled. Results: ${success && 'Valid'}. Updating board...`))
+      .then(() => console.log(gameStateRef.current))
+      .then(() => messageDataRef.current.update = true)
+  }
+
+  useEffect(() => {
+    moveData && moveAndUpdate(moveData) && console.log('sending a move');
+  }, [moveData])
 
   const handleClick = () => {
     console.log('handling click')
     const p1Move = {
       moveType: moves.MOVE_SHIP.NAME,
-      playerID: 'p1',
-      targetPlayerID: 'p1',
+      playerID: 'p2',
+      targetPlayerID: 'p2',
       shipID: 'ship0',
       position: [0, 0],
       angle: 180
     }
-    makeMove(p1Move)
-      .then(results => console.log('move done. results:', results))
+    moveAndUpdate(p1Move)
+
   }
 
   const shipList = [];
@@ -45,29 +58,47 @@ export default function GameWindow() {
         <li>{player.id}: {player.name}</li>
         <ul>{playerShips}</ul>
       </ul>
-      )
+    )
   })
 
-  const mouseData = interactionData.pointer.normalizedPosition;
-  const mouseDataText = mouseData.map(pos => Number.parseFloat(pos).toFixed(2)).join(', ');
-  const currentTileInfo = [];
-  for (let key in interactionData.currentHover) {
-    currentTileInfo.push(<li>{key}: {JSON.stringify(interactionData.currentHover[key])}</li>)
+  const makeString = (arr) => {
+    if(!Array.isArray(arr)) {
+      arr = Object.values(arr)
+    }
+    return arr.map(pos => Number.parseFloat(pos).toFixed(2)).join(', ');
   }
+
+  const mouseData = viewerData.pointer.normalizedPosition;
+  const cameraPos = viewerData.camera.position;
+  const cameraRot = viewerData.camera.rotation;
+
+  const mouseDataText = makeString(mouseData);
+  const cameraPosText = makeString(cameraPos);
+  const cameraRotText = makeString(cameraRot);
+
+  let currentHoverInfo = [];
+  for (let key in viewerData.currentHover) {
+    currentHoverInfo.push(<li key={key}>{key}: {JSON.stringify(viewerData.currentHover[key])}</li>)
+  }
+  if(!currentHoverInfo.length) {
+    currentHoverInfo = <li>No hoverable detected</li>
+  }
+
   return (
     <div className="game-window">
+      <div id="status">Status: {status}</div>
       <div id="info">
         <h2>Debug panel</h2>
-        <p>Board update: {` ${messageData.current.update}, ${messageData.current.timestamp}`}</p>
+        <p>Board update: {` ${messageDataRef.current.update}, ${messageDataRef.current.timestamp}`}</p>
         <ul>
-          <li>Mouse: {mouseDataText}</li> 
+          <li>Mouse: {mouseDataText}</li>
+          <li>Camera pos: {cameraPosText}</li>
+          <li>Camera rot: {cameraRotText}</li>
         </ul>
-        {interactionData.currentHover.instanceId}
         <ul>
-          {currentTileInfo}
+          {currentHoverInfo}
         </ul>
         <button onClick={() => handleClick()}>Place a ship</button>
-        <button onClick={() => messageData.current.update = true}>Tell board to update</button>
         {shipList}
         {engine && `Engine timestamp: ${engine.timestamp}`}
       </div>
