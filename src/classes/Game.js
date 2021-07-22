@@ -145,7 +145,7 @@ class Game {
   get hoverables() {
     const playerShips = this.owningPlayer.board.shipsArr;
     const boards = this.playersArr.map(player => player.board)
-    return [...playerShips, ...boards]
+    return [...playerShips, ...boards, ]
   }
 
   get selectables() {

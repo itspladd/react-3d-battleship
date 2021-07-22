@@ -1,9 +1,11 @@
 import * as THREE from 'three'
 import Game from './Game'
 import Entity from './Entity'
+import Tiles from './Tile'
 
 import { TILE_GEOMETRY, MATERIALS, COLORS } from '../constants/3DBOARD';
 
+const { PlayerBoardTile } = Tiles;
 const { TILE_HEIGHT, TILE_BASE } = TILE_GEOMETRY;
 
 
@@ -131,6 +133,11 @@ class Ship extends Entity {
     this._selected = false;
     this.color = Ship.color;
     this.boardZ = Ship.nullZOffset;
+  }
+
+  canMoveTo(target) {
+    return target instanceof PlayerBoardTile &&
+           target.owner.playerId === this.owner.playerId
   }
 }
 

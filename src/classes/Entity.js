@@ -38,7 +38,8 @@ class Entity {
   }
 
   get angle() {
-    return this._mesh.quaternion._w * 360 / (2 * Math.PI)
+    const zQuat = new THREE.Quaternion(0, 0, 0, 1)
+    return Math.round((this._mesh.quaternion.angleTo(zQuat) * 360) / (2 * Math.PI))
   }
 
   get boardX() {
@@ -88,6 +89,7 @@ class Entity {
     // Rotation begins in the opposite direction you expect, so we flip the amount.
     deg = -1 * (deg - 360)
     const rad = (deg / 360) * 2 * Math.PI
+    console.log(rad)
     const zAxis = new THREE.Vector3(0, 0, 1);
     this.mesh.setRotationFromAxisAngle(zAxis, rad)
   }

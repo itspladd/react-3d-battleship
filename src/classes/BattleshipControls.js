@@ -1,6 +1,12 @@
 import * as THREE from 'three';
 
 import { MapControls } from 'three/examples/jsm/controls/OrbitControls'
+import Ship from './Ship';
+import Tiles from './Tile';
+
+const { Tile, PlayerBoardTile } = Tiles;
+const { MOVES } = require('@itspladd/battleship-engine').CONSTANTS.RULES.DEFAULT_RULES
+
 
 class BattleshipControls extends MapControls {
   constructor( camera, domElement, setViewerData ) {
@@ -23,6 +29,7 @@ class BattleshipControls extends MapControls {
     this.onPointerMove = this.onPointerMove.bind(this); // Called by window, so scope changes
     this.onPointerDown = this.onPointerDown.bind(this); // Called by window, so scope changes
     this.onPointerUp = this.onPointerUp.bind(this); // Called by window, so scope changes
+    this.handleNewHovers = this.handleNewHovers.bind(this); // Called by a forEach
     domElement.addEventListener('mousemove', this.onPointerMove, false);
     domElement.addEventListener('pointerdown', this.onPointerDown, false);
     domElement.addEventListener('pointerup', this.onPointerUp, false);
@@ -152,6 +159,19 @@ class BattleshipControls extends MapControls {
 
   handleNewHovers(hoverable) {
     !hoverable.selected && hoverable.onHover();
+
+    const selection = this.selection;
+    if(selection && selection.canMoveTo(hoverable)) {
+      console.log("move target logged for hoverable:", hoverable)
+      const moveToMake = {
+        moveType: MOVES.MOVE_SHIP.NAME,
+        playerId: selection.owner.playerId,
+        targetPlayerId: selection.owner.playerId,
+        shipID: selection.id,
+        position: hoverable.boardPosition,
+        angle: selection.angle
+      }
+    }
   }
 }
 
