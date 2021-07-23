@@ -100,12 +100,6 @@ class Ship extends Entity {
     })
   }
 
-  updateMesh() {
-    const absX = this.boardX + (this._position !== null && this.owner.startX);
-    const absY = this.boardY + (this._position !== null && this.owner.startY);
-    Game.positionObject(this.mesh, [absX, absY, this.z], this._angle)
-  }
-
   placeAtNull() {
     const {x, y, angle} = this._nullPosition;
     this.angle = angle;
@@ -128,15 +122,15 @@ class Ship extends Entity {
 
   onSelect() {
     this._selected = true;
+    this._placed = false;
     this.color = Ship.hoverColor;
-    this.boardZ = 1.5;
-    console.log(this.angle)
+    this.angle = this.angle + 60;
   }
 
   onDeselect() {
     this._selected = false;
     this.color = Ship.color;
-    !this.placed && this.placeAtNull();
+    //!this.placed && this.placeAtNull();
   }
 
   onPlace() {

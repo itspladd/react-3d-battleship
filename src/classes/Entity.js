@@ -40,7 +40,20 @@ class Entity {
   get angle() {
     // In degrees because I'm nasty. sorry
     const zQuat = new THREE.Quaternion(0, 0, 0, 1)
-    return Math.round((this._mesh.quaternion.angleTo(zQuat) * 360) / (2 * Math.PI))
+    const angle = Math.round((this._mesh.quaternion.angleTo(zQuat) * 360) / (2 * Math.PI))
+
+    // Weird behavior when angle is at 360 or 0, so hard return 0.
+    if(angle === 360 || angle === 0) {
+      return 0;
+    }
+
+    // The w component is negative for 60 and 120 deg, positive for 240 and 300 deg
+    // "angle" will be the same for 120/240 and 60/300 deg respectively
+    // So depending on the w component being pos/neg, we manually calculate what angle we're at
+    // Sorry if this explanation sucks. I can try drawing it if you ask me.
+    const w = this.mesh.quaternion._w;
+    const result = w > 0 ? -1 * (angle - 360) : angle
+    return result
   }
 
   get boardX() {
@@ -88,12 +101,13 @@ class Entity {
   }
 
   set angle(deg) {
+    console.log(`setting angle to ${deg} degrees input`)
     // Rotation begins in the opposite direction you expect, so we flip the amount.
     deg = -1 * (deg - 360)
     const rad = (deg / 360) * 2 * Math.PI
-    console.log(rad)
     const zAxis = new THREE.Vector3(0, 0, 1);
     this.mesh.setRotationFromAxisAngle(zAxis, rad)
+    console.log(`set rotation to ${deg} degrees, got ${rad} radians, quat is now ${JSON.stringify(this.mesh.quaternion)}, get angle returns ${this.angle}`)
   }
 
   set boardX(x) {

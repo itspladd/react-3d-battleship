@@ -179,6 +179,17 @@ class BattleshipControls extends MapControls {
       this.setMoveData(moveToMake)
     }
   }
+
+  makeMoveShipMove(playerID, shipID, position, angle) {
+    this.setMoveData({
+      moveType: MOVES.MOVE_SHIP.NAME,
+      targetPlayerID: playerID,
+      playerID,
+      shipID,
+      position,
+      angle
+    })
+  }
 }
 
 export { BattleshipControls };

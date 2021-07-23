@@ -1,9 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three';
 
-// Helper functions
-//import { hlp3 } from '../helpers/threeHelpers'
-
 import GameViewer from '../classes/GameViewer'
 
 export default function use3DBoard(canvasRef, gameStateRef) {
@@ -39,8 +36,6 @@ export default function use3DBoard(canvasRef, gameStateRef) {
 
   useEffect(() => {
     // === THREE.JS CODE START ===
-
-    //hlp3.positionObject(gameBoard.ships[0], [10, 10], 120)
 
 
     const viewer = new GameViewer(window, canvasRef, setViewerData, messageDataRef, setMoveData)

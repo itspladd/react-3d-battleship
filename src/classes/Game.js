@@ -28,12 +28,6 @@ class Game {
 
   static baseRotationMatrix = new THREE.Matrix4().makeRotationX(Math.PI)
 
-  static positionObject(threeObj, position, rotation) {
-    const [x, y, z] = position;
-    this.placeObjectAt(threeObj, x, y, z)
-    this.setObjRotationDeg(threeObj, rotation)
-  }
-
   static moveObject(threeObj, translation, rotation) {
     const [x, y, z] = translation;
     this.moveObjectBy(threeObj, x, y, z)
@@ -46,19 +40,6 @@ class Game {
     const rad = (deg / 360) * 2 * Math.PI
 
     threeObj.rotateZ(rad)
-  }
-
-  static setObjRotationDeg(threeObj, deg) {
-    // Rotation begins in the opposite direction you expect, so we flip the amount.
-    deg = -1 * (deg - 360)
-    const rad = (deg / 360) * 2 * Math.PI
-    const zAxis = new THREE.Vector3(0, 0, 1);
-    threeObj.setRotationFromAxisAngle(zAxis, rad )
-  }
-
-  static placeObjectAt(threeObj, x, y, z) {
-    const matrix = this.getXYZMatrix(x, y, z);
-    threeObj.position.setFromMatrixPosition(matrix)
   }
 
   static moveObjectBy(threeObj, x, y, z) {
