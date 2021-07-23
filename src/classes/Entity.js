@@ -12,6 +12,7 @@ class Entity {
   static oddColumnOffset = Entity.yPerTile / 2;
 
   static defaultZ = 0;
+  static hoverZ = 1.5;
 
   constructor(mesh) {
     this._mesh = mesh || null;
@@ -62,7 +63,8 @@ class Entity {
 
   get boardY() {
     const offset = (this.boardX % 2) * Entity.oddColumnOffset
-    return -1 * Math.round((this.meshY - offset) / Entity.yPerTile)
+    const y = -1 * Math.round((this.meshY + offset) / Entity.yPerTile)
+    return y
   }
 
   get boardZ() {
@@ -101,13 +103,11 @@ class Entity {
   }
 
   set angle(deg) {
-    console.log(`setting angle to ${deg} degrees input`)
     // Rotation begins in the opposite direction you expect, so we flip the amount.
     deg = -1 * (deg - 360)
     const rad = (deg / 360) * 2 * Math.PI
     const zAxis = new THREE.Vector3(0, 0, 1);
     this.mesh.setRotationFromAxisAngle(zAxis, rad)
-    console.log(`set rotation to ${deg} degrees, got ${rad} radians, quat is now ${JSON.stringify(this.mesh.quaternion)}, get angle returns ${this.angle}`)
   }
 
   set boardX(x) {
