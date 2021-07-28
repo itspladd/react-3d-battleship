@@ -27,7 +27,7 @@ export default function use3DBoard(canvasRef, gameStateRef) {
     currentSelect: {
       objectId: 'none',
       playerId: null,
-      ownerId: null,
+      ownerID: null,
     }
   });
   const [moveData, setMoveData] = useState(null)
