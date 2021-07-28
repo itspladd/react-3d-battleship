@@ -82,12 +82,12 @@ class Game {
   END OF STATIC METHODS
   **************************************************/
 
-  constructor(gameStateRef, ownerId) {
-    this._ownerId = ownerId;
+  constructor(gameStateRef, ownerID) {
+    this._ownerID = ownerID;
     this._gameStateRef = gameStateRef;
 
     this.mapDimensions = this.mapDimensions(this.currentState);
-    this.boardBoundaries = this.findPlayerBoundaries(this.currentState, ownerId)
+    this.boardBoundaries = this.findPlayerBoundaries(this.currentState, ownerID)
 
     // Players create Boards during construction.
     // Boards include Tiles and Ships, so look in Board.js for Tile/Ship init.
@@ -108,7 +108,7 @@ class Game {
   }
 
   get playerShipMeshes() {
-    return this.players[this._ownerId].board.shipMeshes;
+    return this.players[this._ownerID].board.shipMeshes;
   }
 
   get currentState() {
@@ -116,7 +116,11 @@ class Game {
   }
 
   get owningPlayer() {
-    return this.players[this._ownerId];
+    return this.players[this._ownerID];
+  }
+
+  get ownerID() {
+    return this._ownerID
   }
   
   get playersArr() {
@@ -235,12 +239,7 @@ class Game {
       const engineShips = Object.values(engineBoard.ships);
       const viewerBoard = this.players[playerId].board
       const viewerShips = viewerBoard.ships
-      engineShips.forEach(engineShip => {
-        if(engineShip.position !== null) {
-          viewerBoard.moveShip(engineShip.id, engineShip.position);
-          viewerShips[engineShip.id].angle = engineShip.angle;
-        }
-      })
+      engineShips.forEach(viewerBoard.moveShip)
     })
   }
 }
