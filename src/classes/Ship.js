@@ -124,17 +124,16 @@ class Ship extends Entity {
     this._selected = true;
     this._placed = false;
     this.color = Ship.hoverColor;
-    this.angle = this.angle + 60;
+    this.boardZ = Entity.hoverZ;
   }
 
   onDeselect() {
     this._selected = false;
     this.color = Ship.color;
-    //!this.placed && this.placeAtNull();
+    !this.placed && this.placeAtNull();
   }
 
   onPlace() {
-    this.boardZ = Ship.zOffset
     this._placed = true;
   }
 
