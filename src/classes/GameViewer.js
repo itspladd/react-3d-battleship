@@ -74,11 +74,11 @@ class GameViewer {
 
 
 
-  initGame(gameStateRef, ownerId) {
-    const game = new Game(gameStateRef, ownerId);
+  initGame(gameStateRef, ownerID) {
+    const game = new Game(gameStateRef, ownerID);
     this._currentGame = game;
     this.controls.game = game;
-    this.addGameToScene(game, ownerId)
+    this.addGameToScene(game, ownerID)
   }
 
   addGameToScene(game, playerId) {
