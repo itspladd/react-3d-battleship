@@ -81,7 +81,7 @@ class Entity {
 
   // Given an integer X and Y and optional Z
   set boardPosition(vector3) {
-    console.log('setting board position at', vector3)
+    //console.log('setting board position at', vector3)
     const [x, y, z] = vector3;
 
     // meshX is just number of tiles times x per tile
