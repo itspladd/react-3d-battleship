@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import Game from './Game'
 import Ship from './Ship';
 import Tiles from './Tile'
+import Entity from './Entity'
 
 const { Tile, PlayerBoardTile } = Tiles;
 
@@ -22,7 +23,7 @@ class Board {
     this.tilesById = tilesById;
     this.tilesByPosition = tilesByPosition;
     this.ships = this.makeShips(boardData);
-
+    this.moveShip = this.moveShip.bind(this);
   }
 
   get tiles() {
@@ -104,13 +105,19 @@ class Board {
     return ships;
   }
 
-  moveShip(id, vector2) {
-    console.log('board moving ship to', vector2)
-    const [relX, relY] = vector2;
-    const x = relX + this.startX;
-    const y = relY + this.startY;
-    console.log('placing ship at ', x, y)
-    this.ships[id].boardPosition = [x, y];
+  moveShip(ship) {
+    const { id, position, angle } = ship;
+    if(position === null) {
+      this.ships[id].placeAtNull();
+    } else {
+      const [relX, relY] = position;
+      const x = relX + this.startX;
+      const y = relY + this.startY;
+      const z = this.ships[id].placed ? Ship.zOffset : Entity.hoverZ;
+      this.ships[id].boardPosition = [x, y, z];
+      this.ships[id].angle = angle;
+    }
+
   }
 
   currentHover(raycaster) {
