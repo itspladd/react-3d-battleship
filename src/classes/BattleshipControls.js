@@ -30,7 +30,8 @@ class BattleshipControls extends MapControls {
     this.onPointerMove = this.onPointerMove.bind(this); // Called by window, so scope changes
     this.onPointerDown = this.onPointerDown.bind(this); // Called by window, so scope changes
     this.onPointerUp = this.onPointerUp.bind(this); // Called by window, so scope changes
-    this.handleNewHovers = this.handleNewHovers.bind(this); // Called by a forEach
+    this.handleNewHover = this.handleNewHover.bind(this); // Called by a forEach
+    this.handleAbandonedHover = this.handleAbandonedHover.bind(this); // Called by a forEach
     domElement.addEventListener('mousemove', this.onPointerMove, false);
     domElement.addEventListener('pointerdown', this.onPointerDown, false);
     domElement.addEventListener('pointerup', this.onPointerUp, false);
@@ -48,6 +49,10 @@ class BattleshipControls extends MapControls {
     return this._game;
   }
 
+  get playerID() {
+    return this._game.ownerID
+  }
+
   get pointerDelta() {
     return Date.now() - this._pointerDownTime;
   }
@@ -60,9 +65,22 @@ class BattleshipControls extends MapControls {
     this._currentSelected.push(obj)
   }
 
+  get placementTarget() {
+    return this._placementTargets[0];
+  }
+
   deselect() {
     this.selection.onDeselect();
     this._currentSelected.pop();
+  }
+
+  select() {
+    //Grab new selection and handle it.
+    this.selection = this._potentialSelect;
+    this.selection.onSelect();
+
+    // Clear potential selection.
+    this._potentialSelect = null;
   }
 
   handleAnimationLoop() {
@@ -110,25 +128,41 @@ class BattleshipControls extends MapControls {
 
   onPointerUp(event) {
     event.preventDefault();
-    
+
     // If we did a fast click (i.e. not a drag for camera controls)...
     if(this.pointerDelta < 500) {
       // If we already have something selected...
       if(this.selection) {
-        const placementTargets = this._currentHovers.filter(hoverable => this.selection.canMoveTo(hoverable))
-        if(placementTargets.length > 0) {
-          this.selection.onPlace();
-          
+
+        // If there's something new we could select, then do so.
+        if(this._potentialSelect) {
+          // Clear old selection and select new.
+          this.deselect();
+          this.select();
         }
-        this.deselect();
+        // If there's nothing to select, but we CAN place the current selection, do so.
+        else if(this.canPlace(this.selection)) {
+          this.place(this.selection, this.placementTarget)
+          this.deselect();
+        }
+        else {
+          // Otherwise, put the ship back.
+          this.sendMoveShipMove(this.selection.id, null, 0);
+          this.deselect()
+        }
+      } else {
+        if(this._potentialSelect) {
+          this.select();
+        }
       }
 
-      if(this._potentialSelect) {
-        this.selection = this._potentialSelect;
-        this.selection.onSelect();
-        this._potentialSelect = null;
-      }
+
     }
+  }
+
+  canPlace(selectable) {
+    this._placementTargets = this._currentHovers.filter(hoverable => this.selection.canMoveTo(hoverable))
+    return this._placementTargets.length > 0
   }
 
   // Returns true if there are any current hovers or any previous hovers.
@@ -155,39 +189,57 @@ class BattleshipControls extends MapControls {
     const abandonedHovers = this._prevHovers.filter(prevHoverable => !this._currentHovers.includes(prevHoverable));
 
     //If any of the hovers are selected, we don't do hover behavior for that entity.
-    newHovers.forEach(this.handleNewHovers);
-    abandonedHovers.forEach(hoverable => !hoverable.selected && hoverable.onHoverExit());
+    newHovers.forEach(this.handleNewHover);
+    abandonedHovers.forEach(this.handleAbandonedHover);
 
     const currentHover = this._currentHovers.map(hoverable => hoverable.hoverData)[0]
     this.setViewerData(prev => ({ ...prev, currentHover, newHovers }));
     this._prevHovers = this._currentHovers;
   }
 
-  handleNewHovers(hoverable) {
+  handleNewHover(hoverable) {
+    // If it's not selected, do its onHover action.
     !hoverable.selected && hoverable.onHover();
 
     const selection = this.selection;
+
+    // If there's a selected ship that can move to this hoverable,
+    // move it!
     if(selection && selection.canMoveTo(hoverable)) {
-      const moveToMake = {
-        moveType: MOVES.MOVE_SHIP.NAME,
-        playerID: selection.owner.playerId,
-        targetPlayerID: selection.owner.playerId,
-        shipID: selection.id,
-        position: hoverable.boardPosition,
-        angle: selection.angle
-      }
-      this.setMoveData(moveToMake)
+      const playerId = selection.owner.playerId;
+      const shipId = selection.id;
+      const position = hoverable.boardPosition;
+      const angle = selection.angle;
+      this.sendMoveShipMove(shipId, position, angle)
     }
   }
 
-  makeMoveShipMove(playerID, shipID, position, angle) {
+  handleAbandonedHover(hoverable) {
+    !hoverable.selected && hoverable.onHoverExit()
+  }
+
+  place(selection, target) {
+    selection.onPlace();
+    this.sendPlaceShipMove(selection.id)
+  }
+
+  sendMoveShipMove(shipID, position, angle) {
     this.setMoveData({
       moveType: MOVES.MOVE_SHIP.NAME,
-      targetPlayerID: playerID,
-      playerID,
+      targetPlayerID: this.playerID,
+      playerID: this.playerID,
       shipID,
       position,
       angle
+    })
+  }
+
+  sendPlaceShipMove(shipID) {
+    this.setMoveData({
+      moveType: MOVES.PLACE_SHIP.NAME,
+      targetPlayerID: this.playerID,
+      playerID: this.playerID,
+      shipID
     })
   }
 }
