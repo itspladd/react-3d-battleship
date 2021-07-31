@@ -177,7 +177,9 @@ class BattleshipControls extends MapControls {
     const hovering = this._currentHovers.length > 0;
     const prevHovering = this._prevHovers.length > 0
     if (!hovering) {
-      this.setViewerData(prev => ({ ...prev, currentHover: null }));
+      this.setViewerData(prev => {
+        return ({ ...prev, currentHover:null })
+      });
     }
     return hovering || prevHovering;
   }

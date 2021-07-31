@@ -61,6 +61,25 @@ export default function GameWindow() {
     )
   })
 
+  const makeGameDetails = (obj) => {
+    let list = []
+    for(const key in obj) {
+      if(obj[key] instanceof Object || Array.isArray(obj[key])) {
+        list.push(
+          <details>
+            <summary>{key}</summary>
+            {makeGameDetails(obj[key])}
+          </details>
+        )
+      }
+      else {
+        list.unshift(<li>{key}: {obj[key]}</li>)
+      }
+    }
+
+    return (<ul>{list}</ul>)
+  }
+
   const makeString = (arr) => {
     if(!Array.isArray(arr)) {
       arr = Object.values(arr)
@@ -80,9 +99,6 @@ export default function GameWindow() {
   for (let key in viewerData.currentHover) {
     currentHoverInfo.push(<li key={key}>{key}: {JSON.stringify(viewerData.currentHover[key])}</li>)
   }
-  if(!currentHoverInfo.length) {
-    currentHoverInfo = <li>No hoverable detected</li>
-  }
 
   return (
     <div className="game-window">
@@ -100,9 +116,11 @@ export default function GameWindow() {
         </ul>
         <button onClick={() => handleClick()}>Place a ship</button>
         <details>
-          <summary>List of ships</summary>
-          {shipList}
+          <summary>Game engine state</summary>
+          {makeGameDetails(gameStateRef.current)}
+
         </details>
+        
         {engine && `Engine timestamp: ${engine.timestamp}`}
       </div>
       {/* Assign the renderCanvas ref to this canvas element! */}

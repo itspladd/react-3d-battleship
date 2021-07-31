@@ -28,7 +28,8 @@ export default function use3DBoard(canvasRef, gameStateRef) {
       objectId: 'none',
       playerId: null,
       ownerID: null,
-    }
+    },
+    selectStack: []
   });
   const [moveData, setMoveData] = useState(null)
   const messageDataRef = useRef({ update: false, timestamp: Date.now() });
