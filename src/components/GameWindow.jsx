@@ -99,7 +99,10 @@ export default function GameWindow() {
           {currentHoverInfo}
         </ul>
         <button onClick={() => handleClick()}>Place a ship</button>
-        {shipList}
+        <details>
+          <summary>List of ships</summary>
+          {shipList}
+        </details>
         {engine && `Engine timestamp: ${engine.timestamp}`}
       </div>
       {/* Assign the renderCanvas ref to this canvas element! */}
