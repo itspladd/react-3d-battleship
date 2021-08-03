@@ -71,6 +71,27 @@ class Ship extends Entity {
     return this._segmentGroup.children;
   }
 
+  get nullX() {
+    return this._nullPosition[0];
+  }
+
+  get nullY() {
+    return this._nullPosition[1];
+  }
+
+  get nullAngle() {
+    return this._nullPosition[2];
+  }
+
+  get atNull() {
+    return this.boardX === this.nullX &&
+           this.boardY === this.nullY;
+  }
+
+  get enginePosition() {
+    return this.atNull ? null : [this.boardX - this.owner.startX, this.boardY - this.owner.startY]
+  }
+
   get hovered() {
     return this._hovered;
   }
@@ -105,7 +126,7 @@ class Ship extends Entity {
   }
 
   placeAtNull() {
-    const {x, y, angle} = this._nullPosition;
+    const [x, y, angle] = this._nullPosition;
     this.angle = angle;
     this.boardPosition = [x, y]
   }

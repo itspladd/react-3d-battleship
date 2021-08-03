@@ -96,7 +96,7 @@ class Board {
     let nullCounter = 0;
     const {x, y, angle} = SHIP_NULL_START;
     for (let shipId in shipsData) {
-      const nullPosition = {x: (2 * nullCounter + x), y, angle};
+      const nullPosition = [(2 * nullCounter + x), y, angle];
       const owner = this;
       const shipData = { ...shipsData[shipId], nullPosition, owner }
       ships[shipId] = new Ship(shipData)

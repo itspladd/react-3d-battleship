@@ -66,7 +66,7 @@ export default function GameWindow() {
     )
   })
 
-  const makeDetails = (obj, recursive) => {
+  const makeDetails = (obj, recursive = false) => {
     let list = []
     for(const key in obj) {
       if(obj[key] instanceof Object || Array.isArray(obj[key])) {
@@ -105,6 +105,8 @@ export default function GameWindow() {
     currentHoverInfo.push(<li key={key}>{key}: {JSON.stringify(viewerData.currentHover[key])}</li>)
   }
 
+  // TODO: Set up the debugging info so it only recalculates
+  // when a move is reported.
   return (
     <div className="game-window">
       <div id="status">Status: {status.msg}</div>

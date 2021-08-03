@@ -31,11 +31,13 @@ class BattleshipControls extends MapControls {
     this.onPointerMove = this.onPointerMove.bind(this); // Called by window, so scope changes
     this.onPointerDown = this.onPointerDown.bind(this); // Called by window, so scope changes
     this.onPointerUp = this.onPointerUp.bind(this); // Called by window, so scope changes
+    this.onWheel = this.onWheel.bind(this); // Called by window, so scope changes
     this.handleNewHover = this.handleNewHover.bind(this); // Called by a forEach
     this.handleAbandonedHover = this.handleAbandonedHover.bind(this); // Called by a forEach
     domElement.addEventListener('mousemove', this.onPointerMove, false);
     domElement.addEventListener('pointerdown', this.onPointerDown, false);
     domElement.addEventListener('pointerup', this.onPointerUp, false);
+    domElement.addEventListener('wheel', this.onWheel, false);
   }
 
   get camera() {
@@ -82,12 +84,18 @@ class BattleshipControls extends MapControls {
   deselect() {
     this.selection.onDeselect();
     this._currentSelected.pop();
+
+    //Re-enable zoom.
+    this.enableZoom = true;
   }
 
   select() {
     //Grab new selection and handle it.
     this.selection = this._potentialSelect;
     this.selection.onSelect();
+
+    // Turn off camera zoom so we can rotate the object.
+    this.enableZoom = false;
 
     // Clear potential selection.
     this._potentialSelect = null;
@@ -174,6 +182,15 @@ class BattleshipControls extends MapControls {
       }
 
 
+    }
+  }
+
+  onWheel(event) {
+    event.preventDefault();
+
+    if (this.selection) {
+      const angle = event.deltaY > 0 ? 60 : -60;
+      console.log(this.selection.atNull)
     }
   }
 
