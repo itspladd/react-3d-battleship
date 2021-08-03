@@ -21,6 +21,9 @@ class BattleshipControls extends MapControls {
     this._prevSelected = [];
     this._placementTargets = [];
 
+    this.enableHovering = true;
+    this.enableSelection = true;
+
     this._pointer = this.setupPointer();
     // Put angle limits on the camera movement
     //this.maxAzimuthAngle = 0; //Prevent orbiting if uncommented
@@ -58,6 +61,10 @@ class BattleshipControls extends MapControls {
 
   get pointerDelta() {
     return Date.now() - this._pointerDownTime;
+  }
+
+  get dragging() {
+    return this.pointerDown && (this.pointerDelta > 500)
   }
 
   get selection() {
@@ -138,6 +145,7 @@ class BattleshipControls extends MapControls {
 
     // Save the timestamp for this click to calculate click duration
     this._pointerDownTime = Date.now();
+    this.pointerDown = true;
 
     // Find out what was clicked on
     if(this.game) {
@@ -145,14 +153,19 @@ class BattleshipControls extends MapControls {
       this._potentialSelect = this._currentHovers
         .filter(hoverable => this.game.selectables.includes(hoverable))
         .pop();
+      // If the user might have clicked on something, disable panning briefly.
+      if(this._potentialSelect) {
+        this.enablePan = false;
+        setTimeout(() => this.enablePan = true, 100)
+      }
     }
   }
 
   onPointerUp(event) {
     event.preventDefault();
 
-    // If we did a fast click (i.e. not a drag for camera controls)...
-    if(this.pointerDelta < 500) {
+    // If we're not dragging...
+    if(!this.dragging) {
       // If we already have something selected...
       if(this.selection) {
 
@@ -180,17 +193,31 @@ class BattleshipControls extends MapControls {
           this.select();
         }
       }
-
-
     }
+
+    this.pointerDown = false;
   }
 
   onWheel(event) {
     event.preventDefault();
 
+    // If we have anything picked up, rotate it.
     if (this.selection) {
-      const angle = event.deltaY > 0 ? 60 : -60;
-      console.log(this.selection.atNull)
+      // Save the selection as "obj" for ease of use later
+      const obj = this.selection;
+
+      // Determine direction of rotation
+      const angleDelta = event.deltaY > 0 ? 60 : -60;
+
+      // Determine position and angle to send to the engine
+      const position = obj.atNull ? [obj.nullX, obj.nullY] : obj.enginePosition
+      let angle = obj.angle + angleDelta;
+      if(angle === 360) {
+        angle = 0;
+      } else if(angle === -60) {
+        angle = 240;
+      }
+      this.sendMoveShipMove(obj.id, position, angle)
     }
   }
 
@@ -203,7 +230,9 @@ class BattleshipControls extends MapControls {
   detectHovers() {
     // Assume no current hover.
     this._currentHovers = [];
-    if(this.game) {
+
+    // If we have a game and hovering is enabled, find hoverables.
+    if(this.game && !this.dragging) {
       this._currentHovers = this.game.hoverables
         .map(h => h.currentHover(this._raycaster)) // Get hovered objects
         .filter(h => !!h) // Filter out falsy values like undefined or false
@@ -215,6 +244,8 @@ class BattleshipControls extends MapControls {
         return ({ ...prev, currentHover:null })
       });
     }
+
+    // If we have any current hovers or previous hovers, return true so they get handled.
     return hovering || prevHovering;
   }
 
