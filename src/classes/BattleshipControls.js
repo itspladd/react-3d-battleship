@@ -19,6 +19,7 @@ class BattleshipControls extends MapControls {
     this._prevHovers = [];
     this._currentSelected = [];
     this._prevSelected = [];
+    this._placementTargets = [];
 
     this._pointer = this.setupPointer();
     // Put angle limits on the camera movement
@@ -58,7 +59,7 @@ class BattleshipControls extends MapControls {
   }
 
   get selection() {
-    return this._currentSelected[0];
+    return this._currentSelected[0] || null;
   }
 
   set selection(obj) {
@@ -66,7 +67,16 @@ class BattleshipControls extends MapControls {
   }
 
   get placementTarget() {
-    return this._placementTargets[0];
+    return this._placementTargets[0] || null;
+  }
+
+  get debugData() {
+    return {
+      hovers: this._currentHovers,
+      selection: this.selection,
+      placementTarget: this.placementTarget && this.placementTarget.constructor
+
+    }
   }
 
   deselect() {
@@ -85,7 +95,11 @@ class BattleshipControls extends MapControls {
 
   handleAnimationLoop() {
     this._raycaster.setFromCamera(this._pointer, this.camera)
-    this.detectHovers() && this.handleHovers();
+    this.detectHovers() && this.handleHovers() && this.updateData();
+  }
+
+  updateData() {
+    this.setViewerData(prev => ({...prev, controls: this.debugData}));
   }
 
   setupPointer() {
@@ -134,19 +148,22 @@ class BattleshipControls extends MapControls {
       // If we already have something selected...
       if(this.selection) {
 
+        // If we can place the current selection, do so.
+        if(this.canPlace(this.selection)) {
+          console.log('placing current selection')
+          this.place(this.selection, this.placementTarget)
+          this.deselect();
+        }
         // If there's something new we could select, then do so.
-        if(this._potentialSelect) {
+        else if(this._potentialSelect) {
+          console.log('selecting new item')
           // Clear old selection and select new.
           this.deselect();
           this.select();
         }
-        // If there's nothing to select, but we CAN place the current selection, do so.
-        else if(this.canPlace(this.selection)) {
-          this.place(this.selection, this.placementTarget)
-          this.deselect();
-        }
         else {
           // Otherwise, put the ship back.
+          console.log('putting down current item')
           this.sendMoveShipMove(this.selection.id, null, 0);
           this.deselect()
         }
@@ -197,6 +214,8 @@ class BattleshipControls extends MapControls {
     const currentHover = this._currentHovers.map(hoverable => hoverable.hoverData)[0]
     this.setViewerData(prev => ({ ...prev, currentHover, newHovers }));
     this._prevHovers = this._currentHovers;
+
+    return true;
   }
 
   handleNewHover(hoverable) {

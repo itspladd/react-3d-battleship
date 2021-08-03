@@ -238,8 +238,9 @@ class Game {
       const engineBoard = player.board;
       const engineShips = Object.values(engineBoard.ships);
       const viewerBoard = this.players[playerId].board
+      viewerBoard.placedShips = {...engineBoard.placedShips}
       const viewerShips = viewerBoard.ships
-      engineShips.forEach(viewerBoard.moveShip)
+      engineShips.forEach(viewerBoard.updateShip)
     })
   }
 }

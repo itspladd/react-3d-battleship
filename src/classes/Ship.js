@@ -83,6 +83,10 @@ class Ship extends Entity {
     return this._placed;
   }
 
+  set placed(newVal) {
+    this._placed = newVal;
+  }
+
   get hoverData() {
     return {
       id: this._id,
@@ -90,7 +94,7 @@ class Ship extends Entity {
       angle: this._angle,
       nullPosition: this._nullPosition,
       type: this._type,
-
+      placed: this.placed
     }
   }
 
@@ -130,7 +134,6 @@ class Ship extends Entity {
   onDeselect() {
     this._selected = false;
     this.color = Ship.color;
-    !this.placed && this.placeAtNull();
   }
 
   onPlace() {

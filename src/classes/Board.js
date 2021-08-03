@@ -23,7 +23,8 @@ class Board {
     this.tilesById = tilesById;
     this.tilesByPosition = tilesByPosition;
     this.ships = this.makeShips(boardData);
-    this.moveShip = this.moveShip.bind(this);
+    this.placedShips = {};
+    this.updateShip = this.updateShip.bind(this);
   }
 
   get tiles() {
@@ -105,7 +106,7 @@ class Board {
     return ships;
   }
 
-  moveShip(ship) {
+  updateShip(ship) {
     const { id, position, angle } = ship;
     if(position === null) {
       this.ships[id].placeAtNull();
@@ -113,7 +114,7 @@ class Board {
       const [relX, relY] = position;
       const x = relX + this.startX;
       const y = relY + this.startY;
-      const z = this.ships[id].placed ? Ship.zOffset : Entity.hoverZ;
+      const z = this.placedShips[id] ? Ship.zOffset : Entity.hoverZ;
       this.ships[id].boardPosition = [x, y, z];
       this.ships[id].angle = angle;
     }

@@ -24,7 +24,12 @@ export default function GameWindow() {
   const moveAndUpdate = (move) => {
     setStatus('Move sent. Waiting for engine...');
     makeMove(move)
-      .then(success => setStatus(`Move handled. Results: ${success && 'Valid'}. Updating board...`))
+      .then(results => {
+        setStatus({
+          msg: `Move handled. Results: ${results.valid && 'Valid'}. Updating board...`,
+          results
+        })
+      })
       .then(() => console.log(gameStateRef.current))
       .then(() => messageDataRef.current.update = true)
   }
@@ -61,14 +66,14 @@ export default function GameWindow() {
     )
   })
 
-  const makeGameDetails = (obj) => {
+  const makeDetails = (obj, recursive) => {
     let list = []
     for(const key in obj) {
       if(obj[key] instanceof Object || Array.isArray(obj[key])) {
         list.push(
           <details>
             <summary>{key}</summary>
-            {makeGameDetails(obj[key])}
+            {recursive ? makeDetails(obj[key], recursive) : `${obj[key]}`}
           </details>
         )
       }
@@ -102,7 +107,7 @@ export default function GameWindow() {
 
   return (
     <div className="game-window">
-      <div id="status">Status: {status}</div>
+      <div id="status">Status: {status.msg}</div>
       <div id="info">
         <h2>Debug panel</h2>
         <p>Board update: {` ${messageDataRef.current.update}, ${messageDataRef.current.timestamp}`}</p>
@@ -117,11 +122,19 @@ export default function GameWindow() {
         <button onClick={() => handleClick()}>Place a ship</button>
         <details>
           <summary>Game engine state</summary>
-          {makeGameDetails(gameStateRef.current)}
-
+          {/* {makeDetails(gameStateRef.current, true)} */}
         </details>
-        
-        {engine && `Engine timestamp: ${engine.timestamp}`}
+        <details>
+          <summary>Last move results:</summary>
+          {/* {makeDetails(status.results, true)} */}
+        </details>
+        <details>
+          <summary>Controls info</summary>
+          {/* {makeDetails(viewerData.controls, false)} */}
+        </details>
+      </div>
+      <div id="fps">
+        <span>FPS:{viewerData.fps}</span>
       </div>
       {/* Assign the renderCanvas ref to this canvas element! */}
       <canvas ref={renderCanvas} />

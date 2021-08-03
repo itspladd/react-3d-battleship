@@ -117,6 +117,7 @@ class GameViewer {
   }
 
   animate() {
+    const timestamp = Date.now();
     requestAnimationFrame(this.animate);
     this.controls.handleAnimationLoop();
 
@@ -129,6 +130,8 @@ class GameViewer {
     }
 
     this._renderer.render(this._scene, this._camera);
+    const fps = (1000 / (Date.now() - timestamp)).toFixed(0);
+    this._setViewerData(prev => ({...prev, fps}))
   }
 
   // Create a simple green cube for dev/test purposes.
