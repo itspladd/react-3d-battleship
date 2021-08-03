@@ -12,7 +12,7 @@ class Entity {
   static oddColumnOffset = Entity.yPerTile / 2;
 
   static defaultZ = 0;
-  static hoverZ = 1.5;
+  static hoverZ = 2.5;
 
   constructor(mesh) {
     this._mesh = mesh || null;

@@ -99,6 +99,10 @@ class BattleshipControls extends MapControls {
   select() {
     //Grab new selection and handle it.
     this.selection = this._potentialSelect;
+    if (this.selection.placed) {
+      this.selection.placed = false;
+      this.sendUnplaceShipMove(this.selection.id)
+    }
     this.selection.onSelect();
 
     // Turn off camera zoom so we can rotate the object.
@@ -287,9 +291,13 @@ class BattleshipControls extends MapControls {
     !hoverable.selected && hoverable.onHoverExit()
   }
 
-  place(selection, target) {
+  place(selection) {
     selection.onPlace();
     this.sendPlaceShipMove(selection.id)
+  }
+
+  unplace(selection) {
+
   }
 
   sendMoveShipMove(shipID, position, angle) {
@@ -306,6 +314,15 @@ class BattleshipControls extends MapControls {
   sendPlaceShipMove(shipID) {
     this.setMoveData({
       moveType: MOVES.PLACE_SHIP.NAME,
+      targetPlayerID: this.playerID,
+      playerID: this.playerID,
+      shipID
+    })
+  }
+
+  sendUnplaceShipMove(shipID) {
+    this.setMoveData({
+      moveType: MOVES.UNPLACE_SHIP.NAME,
       targetPlayerID: this.playerID,
       playerID: this.playerID,
       shipID
