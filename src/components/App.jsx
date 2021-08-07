@@ -22,7 +22,8 @@ function App() {
     socket.on('connection', () => {
       setState(prev => ({
         ...prev,
-        socketConnected: true
+        socketConnected: true,
+        socket
         }
       ))
     });

@@ -20,6 +20,7 @@ class BattleshipControls extends MapControls {
     this._currentSelected = [];
     this._prevSelected = [];
     this._placementTargets = [];
+    this.mainHover = null;
 
     this.enableHovering = true;
     this.enableSelection = true;
@@ -52,7 +53,35 @@ class BattleshipControls extends MapControls {
   }
 
   get game() {
-    return this._game;
+    return this._game; // _game is the 3D stuff defined in this repo.
+  }
+
+  get engine() {
+    return this._engine; // _engine is the game engine that doesn't know about 3D.
+  }
+
+  set engine(engineObj) {
+    this._engine = engineObj;
+  }
+
+  get gamePlayer() {
+    return this.game.players[this.playerID];
+  }
+
+  get gameBoard() {
+    return this.gamePlayer.board;
+  }
+
+  get enginePlayer() {
+    return this.engine.players[this.playerID];
+  }
+
+  get engineBoard() {
+    return this.enginePlayer.board;
+  }
+
+  get engineShip() {
+    return this.selection ? this.engineBoard.ships[this.selection.id] : null;
   }
 
   get playerID() {
@@ -79,6 +108,18 @@ class BattleshipControls extends MapControls {
     return this._placementTargets[0] || null;
   }
 
+  get myBoardHovers() {
+    const hoveredBoardTiles = this._currentHovers.filter(hoverable => hoverable instanceof PlayerBoardTile)
+    const myBoardTiles = hoveredBoardTiles.filter(tile => tile.playerId === this.playerID)
+    return myBoardTiles;
+  }
+
+  get newMainHover() {
+    return this.mainHover && 
+           this.prevMainHover &&
+           this.mainHover !== this.prevMainHover
+  }
+
   get debugData() {
     return {
       hovers: this._currentHovers,
@@ -86,6 +127,11 @@ class BattleshipControls extends MapControls {
       placementTarget: this.placementTarget && this.placementTarget.constructor
 
     }
+  }
+
+  initGame(game, ownerID, engine) {
+    this.game = game;
+    this.engine = engine;
   }
 
   deselect() {
@@ -118,7 +164,8 @@ class BattleshipControls extends MapControls {
   }
 
   updateData() {
-    this.setViewerData(prev => ({...prev, controls: this.debugData}));
+    // Only use in case of bugs.
+    //this.setViewerData(prev => ({...prev, controls: this.debugData}));
   }
 
   setupPointer() {
@@ -186,8 +233,8 @@ class BattleshipControls extends MapControls {
           this.deselect();
           this.select();
         }
-        else {
-          // Otherwise, put the ship back.
+        // If we're not hovering over our board, put the ship back.
+        else if (!this.myBoardHovers.length > 0) {
           console.log('putting down current item')
           this.sendMoveShipMove(this.selection.id, null, 0);
           this.deselect()
@@ -219,15 +266,21 @@ class BattleshipControls extends MapControls {
       if(angle === 360) {
         angle = 0;
       } else if(angle === -60) {
-        angle = 240;
+        angle = 300;
       }
       this.sendMoveShipMove(obj.id, position, angle)
     }
   }
 
   canPlace(selectable) {
-    this._placementTargets = this._currentHovers.filter(hoverable => this.selection.canMoveTo(hoverable))
-    return this._placementTargets.length > 0
+    // Find the ship in the engine
+    const ship = this.engineBoard.ships[selectable.id]
+
+    // Find potential targets to place
+    this._placementTargets = this._currentHovers.filter(hoverable => selectable.canMoveTo(hoverable))
+
+    // Do validation from the engine board
+    return this._placementTargets.length > 0 && this.engineBoard.validShipLocation(ship)
   }
 
   // Returns true if there are any current hovers or any previous hovers.
@@ -240,10 +293,24 @@ class BattleshipControls extends MapControls {
       this._currentHovers = this.game.hoverables
         .map(h => h.currentHover(this._raycaster)) // Get hovered objects
         .filter(h => !!h) // Filter out falsy values like undefined or false
+      this.prevMainHover = this.mainHover;
+      this.mainHover = this.myBoardHovers[0];
     }
+
+    // If we have a selection, find the tiles it's hovering over.
+    if(this.selection && this.canPlace(this.selection)) {
+      this.engineShip.segments.forEach((segment, index) => {
+        if(index !== 0) {
+          const [y, x] = segment.position;
+          const tile = this.gameBoard.tiles[this.gameBoard.tilesByPosition[x][y]];
+          this._currentHovers.push(tile)
+        }
+      })
+    }
+
     const hovering = this._currentHovers.length > 0;
     const prevHovering = this._prevHovers.length > 0
-    if (!hovering) {
+    if (!hovering && prevHovering) {
       this.setViewerData(prev => {
         return ({ ...prev, currentHover:null })
       });
@@ -259,12 +326,20 @@ class BattleshipControls extends MapControls {
     const newHovers = this._currentHovers.filter(currentHoverable => !this._prevHovers.includes(currentHoverable));
     const abandonedHovers = this._prevHovers.filter(prevHoverable => !this._currentHovers.includes(prevHoverable));
 
+    if(this.newMainHover) {
+      console.log("adding mainHover to newHovers:");
+      console.log(this.mainHover)
+      newHovers.unshift(this.mainHover)
+    }
     //If any of the hovers are selected, we don't do hover behavior for that entity.
     newHovers.forEach(this.handleNewHover);
     abandonedHovers.forEach(this.handleAbandonedHover);
 
     const currentHover = this._currentHovers.map(hoverable => hoverable.hoverData)[0]
-    this.setViewerData(prev => ({ ...prev, currentHover, newHovers }));
+
+    if(newHovers.length > 0) {
+      this.setViewerData(prev => ({ ...prev, currentHover, newHovers }));
+    }
     this._prevHovers = this._currentHovers;
 
     return true;
@@ -277,8 +352,10 @@ class BattleshipControls extends MapControls {
     const selection = this.selection;
 
     // If there's a selected ship that can move to this hoverable,
-    // move it!
-    if(selection && selection.canMoveTo(hoverable)) {
+    // move it and update the tiles its segments are hovering over!
+    if(hoverable === this.mainHover &&
+       selection && 
+       selection.canMoveTo(hoverable)) {
       const playerId = selection.owner.playerId;
       const shipId = selection.id;
       const position = hoverable.boardPosition;

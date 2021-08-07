@@ -10,30 +10,36 @@ import use3DBoard from '../hooks/use3DBoard'
 
 // Component
 export default function GameWindow() {
+  // DEV - REMOVE LATER
   //console.log('rendering gamewindow')
+  const playerId = 'p2';
+  /************ END DEV DATA*/
 
   // This ref will hold the DOM <canvas> element where we render the game.
   const renderCanvas = useRef(null);
 
 
-
   const [engine, moves, gameStateRef, makeMove] = useGameEngine();
-  const [viewerData, messageDataRef, moveData] = use3DBoard(renderCanvas, gameStateRef);
+  const [viewerData, messageDataRef, moveData] = use3DBoard(renderCanvas, gameStateRef, engine, playerId);
   const [status, setStatus] = useState('Waiting');
+  const [details, setDetails] = useState();
 
   const moveAndUpdate = (move) => {
     setStatus('Move sent. Waiting for engine...');
     makeMove(move)
       .then(results => {
+        console.log(results)
         setStatus({
           msg: `Move handled. Results: ${results.valid && 'Valid'}. Updating board...`,
           results
         })
       })
-      .then(() => console.log(gameStateRef.current))
       .then(() => messageDataRef.current.update = true)
+      .catch(err => console.log("yo"))
   }
 
+  // When moveData changes, send a move to the engine.
+  // All moves should be sent in this way.
   useEffect(() => {
     moveData && moveAndUpdate(moveData) && console.log('sending a move');
   }, [moveData])
@@ -52,6 +58,12 @@ export default function GameWindow() {
 
   }
 
+  const markPlayerReady = () => {
+    if(engine.players[playerId].board.allShipsPlaced) {
+
+    }
+  }
+
   const shipList = [];
   gameStateRef.current.players && Object.values(gameStateRef.current.players).forEach(player => {
     const playerShips = [];
@@ -66,24 +78,31 @@ export default function GameWindow() {
     )
   })
 
-  const makeDetails = (obj, recursive = false) => {
-    let list = []
-    for(const key in obj) {
-      if(obj[key] instanceof Object || Array.isArray(obj[key])) {
-        list.push(
-          <details>
-            <summary>{key}</summary>
-            {recursive ? makeDetails(obj[key], recursive) : `${obj[key]}`}
-          </details>
-        )
+  // Create the updated game engine details when they change
+
+  useEffect(() => {
+    const makeDetails = (obj, recursive = false) => {
+      let list = []
+      for(const key in obj) {
+        if(obj[key] instanceof Object || Array.isArray(obj[key])) {
+          list.push(
+            <details>
+              <summary>{key}</summary>
+              {recursive ? makeDetails(obj[key], recursive) : `${obj[key]}`}
+            </details>
+          )
+        }
+        else {
+          list.unshift(<li>{key}: {obj[key]}</li>)
+        }
       }
-      else {
-        list.unshift(<li>{key}: {obj[key]}</li>)
-      }
+  
+      return (<ul>{list}</ul>)
     }
 
-    return (<ul>{list}</ul>)
-  }
+    setDetails(makeDetails(gameStateRef.current, true));
+  }, [gameStateRef.current])
+
 
   const makeString = (arr) => {
     if(!Array.isArray(arr)) {
@@ -118,13 +137,21 @@ export default function GameWindow() {
           <li>Camera pos: {cameraPosText}</li>
           <li>Camera rot: {cameraRotText}</li>
         </ul>
-        <ul>
-          {currentHoverInfo}
-        </ul>
-        <button onClick={() => handleClick()}>Place a ship</button>
+        <details>
+          <summary>Current hover info</summary>
+          <ul>
+            {currentHoverInfo}
+          </ul>
+        </details>
+        <button 
+          onClick={() => handleClick()}
+          disabled={true}
+          >
+          Start the game
+        </button>
         <details>
           <summary>Game engine state</summary>
-          {/* {makeDetails(gameStateRef.current, true)} */}
+          {details}
         </details>
         <details>
           <summary>Last move results:</summary>
@@ -135,9 +162,9 @@ export default function GameWindow() {
           {/* {makeDetails(viewerData.controls, false)} */}
         </details>
       </div>
-      <div id="fps">
+{/*       <div id="fps">
         <span>FPS:{viewerData.fps}</span>
-      </div>
+      </div> */}
       {/* Assign the renderCanvas ref to this canvas element! */}
       <canvas ref={renderCanvas} />
     </div>

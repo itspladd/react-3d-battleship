@@ -45,6 +45,7 @@ class Ship extends Entity {
   constructor({typeStr, segments, angle, position, nullPosition, id, owner}) {
 
     const [segmentArr, segmentGroup] = Ship.makeSegments(typeStr, segments);
+    // Run the Entity constructor to save segmentGroup as this._mesh:
     super(segmentGroup)
     this._owner = owner;
     this._type = typeStr;

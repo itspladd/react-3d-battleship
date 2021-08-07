@@ -3,10 +3,7 @@ import * as THREE from 'three';
 
 import GameViewer from '../classes/GameViewer'
 
-export default function use3DBoard(canvasRef, gameStateRef) {
-  // DEV - REMOVE LATER
-  const playerId = 'p2';
-  /************ END DEV DATA*/
+export default function use3DBoard(canvasRef, gameStateRef, engine, playerId) {
 
   const [viewerData, setViewerData] = useState({
     pointer: {
@@ -39,8 +36,8 @@ export default function use3DBoard(canvasRef, gameStateRef) {
     // === THREE.JS CODE START ===
 
 
-    const viewer = new GameViewer(window, canvasRef, setViewerData, messageDataRef, setMoveData)
-    viewer.initGame(gameStateRef, playerId)
+    const viewer = new GameViewer(window, canvasRef, setViewerData, messageDataRef, setMoveData, engine)
+    viewer.initGame(gameStateRef, playerId, engine)
 
     viewer.animate();
     // === THREE.JS CODE END ===

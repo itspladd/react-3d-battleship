@@ -3,7 +3,7 @@ import { BattleshipControls } from './BattleshipControls'
 import Game from './Game';
 
 class GameViewer {
-  constructor(window, canvasRef, setViewerData, messageDataRef, setMoveData) {
+  constructor(window, canvasRef, setViewerData, messageDataRef, setMoveData, engine) {
     this._canvasRef = canvasRef;
     this._setViewerData = setViewerData;
     this._messageDataRef = messageDataRef;
@@ -11,7 +11,7 @@ class GameViewer {
     this._scene = new THREE.Scene();
     this._renderer = new THREE.WebGLRenderer({ canvas: this._canvasRef.current });
     this._camera = this.setupCamera();
-    this._controls = this.setupControls(setMoveData);
+    this._controls = this.setupControls(setMoveData, engine);
 
 
     this._renderer.setSize(window.innerWidth, window.innerHeight);
@@ -74,10 +74,10 @@ class GameViewer {
 
 
 
-  initGame(gameStateRef, ownerID) {
+  initGame(gameStateRef, ownerID, engine) {
     const game = new Game(gameStateRef, ownerID);
     this._currentGame = game;
-    this.controls.game = game;
+    this.controls.initGame(game, ownerID, engine)
     this.addGameToScene(game, ownerID)
   }
 
@@ -131,7 +131,7 @@ class GameViewer {
 
     this._renderer.render(this._scene, this._camera);
     const fps = (1000 / (Date.now() - timestamp)).toFixed(0);
-    this._setViewerData(prev => ({...prev, fps}))
+    //this._setViewerData(prev => ({...prev, fps}))
   }
 
   // Create a simple green cube for dev/test purposes.
