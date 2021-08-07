@@ -280,7 +280,9 @@ class BattleshipControls extends MapControls {
     this._placementTargets = this._currentHovers.filter(hoverable => selectable.canMoveTo(hoverable))
 
     // Do validation from the engine board
-    return this._placementTargets.length > 0 && this.engineBoard.validShipLocation(ship)
+    return this._placementTargets.length > 0 &&
+           ship.position !== null &&
+           this.engineBoard.validShipLocation(ship)
   }
 
   // Returns true if there are any current hovers or any previous hovers.
