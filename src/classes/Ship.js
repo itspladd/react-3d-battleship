@@ -48,6 +48,7 @@ class Ship extends Entity {
     // Run the Entity constructor to save segmentGroup as this._mesh:
     super(segmentGroup)
     this._owner = owner;
+    this._engine = owner.engine.ships[id]
     this._type = typeStr;
     this._segmentArr = segmentArr;
     this._segmentGroup = segmentGroup;
@@ -62,6 +63,10 @@ class Ship extends Entity {
 
   get owner() {
     return this._owner;
+  }
+
+  get engine() {
+    return this._engine;
   }
 
   get id() {

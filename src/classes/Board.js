@@ -12,6 +12,7 @@ const { SHIP_NULL_START } = require('../constants/3DBOARD').BOARD_DIMENSIONS
 class Board {
   constructor(owner, boardData, boundaries) {
     this._owner = owner;
+    this._engine = owner.engine.board;
     const { startX, startY, endX, endY } = boundaries;
     this._start = [startX, startY];
     this._end = [endX, endY];
@@ -25,6 +26,10 @@ class Board {
     this.ships = this.makeShips(boardData);
     this.placedShips = {};
     this.updateShip = this.updateShip.bind(this);
+  }
+
+  get engine() {
+    return this._engine;
   }
 
   get tiles() {

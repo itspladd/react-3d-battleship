@@ -82,9 +82,10 @@ class Game {
   END OF STATIC METHODS
   **************************************************/
 
-  constructor(gameStateRef, ownerID) {
+  constructor(gameStateRef, ownerID, engine) {
     this._ownerID = ownerID;
     this._gameStateRef = gameStateRef;
+    this._engine = engine;
 
     this.mapDimensions = this.mapDimensions(this.currentState);
     this.boardBoundaries = this.findPlayerBoundaries(this.currentState, ownerID)
@@ -95,6 +96,10 @@ class Game {
     this.fillerTiles = this.initFillerTiles();
   }
 
+  get engine() {
+    return this._engine;
+  }
+
   get mapRows() {
     return this.mapDimensions[0];
   }
@@ -102,6 +107,7 @@ class Game {
   get mapColumns() {
     return this.mapDimensions[1];
   }
+
 
   get totalTiles() {
     return this.mapRows * this.mapColumns;
@@ -122,7 +128,7 @@ class Game {
   get ownerID() {
     return this._ownerID
   }
-  
+
   get playersArr() {
     return Object.values(this.players);
   }

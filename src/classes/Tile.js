@@ -106,11 +106,16 @@ class PlayerBoardTile extends HoverableTile {
   constructor(id, mesh, position, owner, type) {
     super(id, mesh, position, Tile.boardColor, Tile.boardHoverColor);
     this._owner = owner;
+    this._engine = this.owner.engine.tiles[this.boardX][this.boardY]
     this._type = type;
   }
 
   get owner() {
     return this._owner;
+  }
+
+  get engine() {
+    return this._engine;
   }
 
   get playerId() {
@@ -129,9 +134,17 @@ class PlayerBoardTile extends HoverableTile {
     this._type = newType;
   }
 
+  get boardX() {
+    return this._x - this.owner.startX;
+  }
+
+  get boardY() {
+    return this._y - this.owner.startY
+  }
+
   // Position on this specific game board using integer values.
   get boardPosition() {
-    return [this._x - this.owner.startX, this._y - this.owner.startY]
+    return [this.boardX, this.boardY]
   }
 }
 

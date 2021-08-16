@@ -75,7 +75,7 @@ class GameViewer {
 
 
   initGame(gameStateRef, ownerID, engine) {
-    const game = new Game(gameStateRef, ownerID);
+    const game = new Game(gameStateRef, ownerID, engine);
     this._currentGame = game;
     this.controls.initGame(game, ownerID, engine)
     this.addGameToScene(game, ownerID)
