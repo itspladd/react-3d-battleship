@@ -24,7 +24,7 @@ export default function useGameEngine() {
     console.log('making a move: ', move)
     const results = await engine.inputMove(move);
     gameStateRef.current = results.gameState
-    return results.valid;
+    return results;
   }
 
   return [engine, moves, gameStateRef, makeMove]

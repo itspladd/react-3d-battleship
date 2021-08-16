@@ -18,11 +18,36 @@
   color: #dddddd
 }
 
+#info details {
+  margin-top: 0.2em;
+  padding-left: -1em;
+}
+
+#info ul {
+  padding-left: 20px;
+}
+
+#info ul ul {
+  padding-left: 0.75em;
+}
+
 #status {
   position: absolute;
   font-family: monospace;
   top: 10px;
   left: 50%;
+  text-align: center;
+  z-index: 100;
+  display: block;
+  color: #ff0000
+}
+
+#fps {
+  position: absolute;
+  font-family: monospace;
+
+  top: 10px;
+  left: 95%;
   text-align: center;
   z-index: 100;
   display: block;

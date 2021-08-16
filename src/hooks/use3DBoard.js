@@ -1,15 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three';
 
-// Helper functions
-//import { hlp3 } from '../helpers/threeHelpers'
-
 import GameViewer from '../classes/GameViewer'
 
-export default function use3DBoard(canvasRef, gameStateRef) {
-  // DEV - REMOVE LATER
-  const playerId = 'p2';
-  /************ END DEV DATA*/
+export default function use3DBoard(canvasRef, gameStateRef, engine, playerId) {
 
   const [viewerData, setViewerData] = useState({
     pointer: {
@@ -30,8 +24,9 @@ export default function use3DBoard(canvasRef, gameStateRef) {
     currentSelect: {
       objectId: 'none',
       playerId: null,
-      ownerId: null,
-    }
+      ownerID: null,
+    },
+    selectStack: []
   });
   const [moveData, setMoveData] = useState(null)
   const messageDataRef = useRef({ update: false, timestamp: Date.now() });
@@ -40,11 +35,9 @@ export default function use3DBoard(canvasRef, gameStateRef) {
   useEffect(() => {
     // === THREE.JS CODE START ===
 
-    //hlp3.positionObject(gameBoard.ships[0], [10, 10], 120)
 
-
-    const viewer = new GameViewer(window, canvasRef, setViewerData, messageDataRef, setMoveData)
-    viewer.initGame(gameStateRef, playerId)
+    const viewer = new GameViewer(window, canvasRef, setViewerData, messageDataRef, setMoveData, engine)
+    viewer.initGame(gameStateRef, playerId, engine)
 
     viewer.animate();
     // === THREE.JS CODE END ===

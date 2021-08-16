@@ -45,8 +45,10 @@ class Ship extends Entity {
   constructor({typeStr, segments, angle, position, nullPosition, id, owner}) {
 
     const [segmentArr, segmentGroup] = Ship.makeSegments(typeStr, segments);
+    // Run the Entity constructor to save segmentGroup as this._mesh:
     super(segmentGroup)
     this._owner = owner;
+    this._engine = owner.engine.ships[id]
     this._type = typeStr;
     this._segmentArr = segmentArr;
     this._segmentGroup = segmentGroup;
@@ -63,12 +65,37 @@ class Ship extends Entity {
     return this._owner;
   }
 
+  get engine() {
+    return this._engine;
+  }
+
   get id() {
     return this._id;
   }
 
   get segmentMeshes() {
     return this._segmentGroup.children;
+  }
+
+  get nullX() {
+    return this._nullPosition[0];
+  }
+
+  get nullY() {
+    return this._nullPosition[1];
+  }
+
+  get nullAngle() {
+    return this._nullPosition[2];
+  }
+
+  get atNull() {
+    return this.boardX === this.nullX &&
+           this.boardY === this.nullY;
+  }
+
+  get enginePosition() {
+    return this.atNull ? null : [this.boardX - this.owner.startX, this.boardY - this.owner.startY]
   }
 
   get hovered() {
@@ -83,6 +110,10 @@ class Ship extends Entity {
     return this._placed;
   }
 
+  set placed(newVal) {
+    this._placed = newVal;
+  }
+
   get hoverData() {
     return {
       id: this._id,
@@ -90,7 +121,7 @@ class Ship extends Entity {
       angle: this._angle,
       nullPosition: this._nullPosition,
       type: this._type,
-
+      placed: this.placed
     }
   }
 
@@ -100,14 +131,8 @@ class Ship extends Entity {
     })
   }
 
-  updateMesh() {
-    const absX = this.boardX + (this._position !== null && this.owner.startX);
-    const absY = this.boardY + (this._position !== null && this.owner.startY);
-    Game.positionObject(this.mesh, [absX, absY, this.z], this._angle)
-  }
-
   placeAtNull() {
-    const {x, y, angle} = this._nullPosition;
+    const [x, y, angle] = this._nullPosition;
     this.angle = angle;
     this.boardPosition = [x, y]
   }
@@ -128,19 +153,17 @@ class Ship extends Entity {
 
   onSelect() {
     this._selected = true;
+    this._placed = false;
     this.color = Ship.hoverColor;
-    this.boardZ = 1.5;
-    console.log(this.angle)
+    this.boardZ = Entity.hoverZ;
   }
 
   onDeselect() {
     this._selected = false;
     this.color = Ship.color;
-    !this.placed && this.placeAtNull();
   }
 
   onPlace() {
-    this.boardZ = Ship.zOffset
     this._placed = true;
   }
 

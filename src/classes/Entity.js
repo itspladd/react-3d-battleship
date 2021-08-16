@@ -12,6 +12,7 @@ class Entity {
   static oddColumnOffset = Entity.yPerTile / 2;
 
   static defaultZ = 0;
+  static hoverZ = 2.5;
 
   constructor(mesh) {
     this._mesh = mesh || null;
@@ -40,7 +41,20 @@ class Entity {
   get angle() {
     // In degrees because I'm nasty. sorry
     const zQuat = new THREE.Quaternion(0, 0, 0, 1)
-    return Math.round((this._mesh.quaternion.angleTo(zQuat) * 360) / (2 * Math.PI))
+    const angle = Math.round((this._mesh.quaternion.angleTo(zQuat) * 360) / (2 * Math.PI))
+
+    // Weird behavior when angle is at 360 or 0, so hard return 0.
+    if(angle === 360 || angle === 0) {
+      return 0;
+    }
+
+    // The w component is negative for 60 and 120 deg, positive for 240 and 300 deg
+    // "angle" will be the same for 120/240 and 60/300 deg respectively
+    // So depending on the w component being pos/neg, we manually calculate what angle we're at
+    // Sorry if this explanation sucks. I can try drawing it if you ask me.
+    const w = this.mesh.quaternion._w;
+    const result = w > 0 ? -1 * (angle - 360) : angle
+    return result
   }
 
   get boardX() {
@@ -49,7 +63,8 @@ class Entity {
 
   get boardY() {
     const offset = (this.boardX % 2) * Entity.oddColumnOffset
-    return -1 * Math.round((this.meshY - offset) / Entity.yPerTile)
+    const y = -1 * Math.round((this.meshY + offset) / Entity.yPerTile)
+    return y
   }
 
   get boardZ() {
@@ -66,7 +81,7 @@ class Entity {
 
   // Given an integer X and Y and optional Z
   set boardPosition(vector3) {
-    console.log('setting board position at', vector3)
+    //console.log('setting board position at', vector3)
     const [x, y, z] = vector3;
 
     // meshX is just number of tiles times x per tile
@@ -91,7 +106,6 @@ class Entity {
     // Rotation begins in the opposite direction you expect, so we flip the amount.
     deg = -1 * (deg - 360)
     const rad = (deg / 360) * 2 * Math.PI
-    console.log(rad)
     const zAxis = new THREE.Vector3(0, 0, 1);
     this.mesh.setRotationFromAxisAngle(zAxis, rad)
   }

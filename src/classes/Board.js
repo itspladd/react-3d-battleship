@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import Game from './Game'
 import Ship from './Ship';
 import Tiles from './Tile'
+import Entity from './Entity'
 
 const { Tile, PlayerBoardTile } = Tiles;
 
@@ -11,6 +12,7 @@ const { SHIP_NULL_START } = require('../constants/3DBOARD').BOARD_DIMENSIONS
 class Board {
   constructor(owner, boardData, boundaries) {
     this._owner = owner;
+    this._engine = owner.engine.board;
     const { startX, startY, endX, endY } = boundaries;
     this._start = [startX, startY];
     this._end = [endX, endY];
@@ -22,7 +24,12 @@ class Board {
     this.tilesById = tilesById;
     this.tilesByPosition = tilesByPosition;
     this.ships = this.makeShips(boardData);
+    this.placedShips = {};
+    this.updateShip = this.updateShip.bind(this);
+  }
 
+  get engine() {
+    return this._engine;
   }
 
   get tiles() {
@@ -94,7 +101,7 @@ class Board {
     let nullCounter = 0;
     const {x, y, angle} = SHIP_NULL_START;
     for (let shipId in shipsData) {
-      const nullPosition = {x: (2 * nullCounter + x), y, angle};
+      const nullPosition = [(2 * nullCounter + x), y, angle];
       const owner = this;
       const shipData = { ...shipsData[shipId], nullPosition, owner }
       ships[shipId] = new Ship(shipData)
@@ -104,13 +111,19 @@ class Board {
     return ships;
   }
 
-  moveShip(id, vector2) {
-    console.log('board moving ship to', vector2)
-    const [relX, relY] = vector2;
-    const x = relX + this.startX;
-    const y = relY + this.startY;
-    console.log('placing ship at ', x, y)
-    this.ships[id].boardPosition = [x, y];
+  updateShip(ship) {
+    const { id, position, angle } = ship;
+    if(position === null) {
+      this.ships[id].placeAtNull();
+    } else {
+      const [relX, relY] = position;
+      const x = relX + this.startX;
+      const y = relY + this.startY;
+      const z = this.placedShips[id] ? Ship.zOffset : Entity.hoverZ;
+      this.ships[id].boardPosition = [x, y, z];
+      this.ships[id].angle = angle;
+    }
+
   }
 
   currentHover(raycaster) {

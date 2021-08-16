@@ -28,12 +28,6 @@ class Game {
 
   static baseRotationMatrix = new THREE.Matrix4().makeRotationX(Math.PI)
 
-  static positionObject(threeObj, position, rotation) {
-    const [x, y, z] = position;
-    this.placeObjectAt(threeObj, x, y, z)
-    this.setObjRotationDeg(threeObj, rotation)
-  }
-
   static moveObject(threeObj, translation, rotation) {
     const [x, y, z] = translation;
     this.moveObjectBy(threeObj, x, y, z)
@@ -46,19 +40,6 @@ class Game {
     const rad = (deg / 360) * 2 * Math.PI
 
     threeObj.rotateZ(rad)
-  }
-
-  static setObjRotationDeg(threeObj, deg) {
-    // Rotation begins in the opposite direction you expect, so we flip the amount.
-    deg = -1 * (deg - 360)
-    const rad = (deg / 360) * 2 * Math.PI
-    const zAxis = new THREE.Vector3(0, 0, 1);
-    threeObj.setRotationFromAxisAngle(zAxis, rad )
-  }
-
-  static placeObjectAt(threeObj, x, y, z) {
-    const matrix = this.getXYZMatrix(x, y, z);
-    threeObj.position.setFromMatrixPosition(matrix)
   }
 
   static moveObjectBy(threeObj, x, y, z) {
@@ -101,17 +82,22 @@ class Game {
   END OF STATIC METHODS
   **************************************************/
 
-  constructor(gameStateRef, ownerId) {
-    this._ownerId = ownerId;
+  constructor(gameStateRef, ownerID, engine) {
+    this._ownerID = ownerID;
     this._gameStateRef = gameStateRef;
+    this._engine = engine;
 
     this.mapDimensions = this.mapDimensions(this.currentState);
-    this.boardBoundaries = this.findPlayerBoundaries(this.currentState, ownerId)
+    this.boardBoundaries = this.findPlayerBoundaries(this.currentState, ownerID)
 
     // Players create Boards during construction.
     // Boards include Tiles and Ships, so look in Board.js for Tile/Ship init.
     this.players = this.initPlayers(this.currentState, this.boardBoundaries);
     this.fillerTiles = this.initFillerTiles();
+  }
+
+  get engine() {
+    return this._engine;
   }
 
   get mapRows() {
@@ -122,12 +108,13 @@ class Game {
     return this.mapDimensions[1];
   }
 
+
   get totalTiles() {
     return this.mapRows * this.mapColumns;
   }
 
   get playerShipMeshes() {
-    return this.players[this._ownerId].board.shipMeshes;
+    return this.players[this._ownerID].board.shipMeshes;
   }
 
   get currentState() {
@@ -135,9 +122,13 @@ class Game {
   }
 
   get owningPlayer() {
-    return this.players[this._ownerId];
+    return this.players[this._ownerID];
   }
-  
+
+  get ownerID() {
+    return this._ownerID
+  }
+
   get playersArr() {
     return Object.values(this.players);
   }
@@ -253,13 +244,9 @@ class Game {
       const engineBoard = player.board;
       const engineShips = Object.values(engineBoard.ships);
       const viewerBoard = this.players[playerId].board
+      viewerBoard.placedShips = {...engineBoard.placedShips}
       const viewerShips = viewerBoard.ships
-      engineShips.forEach(engineShip => {
-        if(engineShip.position !== null) {
-          viewerBoard.moveShip(engineShip.id, engineShip.position);
-          viewerShips[engineShip.id].angle = engineShip.angle;
-        }
-      })
+      engineShips.forEach(viewerBoard.updateShip)
     })
   }
 }
