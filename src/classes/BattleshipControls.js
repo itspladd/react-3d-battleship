@@ -328,9 +328,9 @@ class BattleshipControls extends MapControls {
     const newHovers = this._currentHovers.filter(currentHoverable => !this._prevHovers.includes(currentHoverable));
     const abandonedHovers = this._prevHovers.filter(prevHoverable => !this._currentHovers.includes(prevHoverable));
 
-    if(this.newMainHover) {
-      console.log("adding mainHover to newHovers:");
-      console.log(this.mainHover)
+    // If we have a new main hover that wasn't already in the new hover list...
+    if(this.newMainHover && !newHovers.includes(this.mainHover)) {
+      //...add the main hover to the list.
       newHovers.unshift(this.mainHover)
     }
     //If any of the hovers are selected, we don't do hover behavior for that entity.
@@ -356,7 +356,7 @@ class BattleshipControls extends MapControls {
     // If there's a selected ship that can move to this hoverable,
     // move it and update the tiles its segments are hovering over!
     if(hoverable === this.mainHover &&
-       selection && 
+       selection &&
        selection.canMoveTo(hoverable)) {
       const playerId = selection.owner.playerId;
       const shipId = selection.id;
