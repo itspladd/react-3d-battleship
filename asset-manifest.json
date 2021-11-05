@@ -1,22 +1,22 @@
 {
   "files": {
     "main.css": "/shootyboats/static/css/main.ffda2ec0.chunk.css",
-    "main.js": "/shootyboats/static/js/main.71771889.chunk.js",
-    "main.js.map": "/shootyboats/static/js/main.71771889.chunk.js.map",
+    "main.js": "/shootyboats/static/js/main.9846b401.chunk.js",
+    "main.js.map": "/shootyboats/static/js/main.9846b401.chunk.js.map",
     "runtime-main.js": "/shootyboats/static/js/runtime-main.3a38f38e.js",
     "runtime-main.js.map": "/shootyboats/static/js/runtime-main.3a38f38e.js.map",
-    "static/js/2.413e3a22.chunk.js": "/shootyboats/static/js/2.413e3a22.chunk.js",
-    "static/js/2.413e3a22.chunk.js.map": "/shootyboats/static/js/2.413e3a22.chunk.js.map",
+    "static/js/2.e6149d8d.chunk.js": "/shootyboats/static/js/2.e6149d8d.chunk.js",
+    "static/js/2.e6149d8d.chunk.js.map": "/shootyboats/static/js/2.e6149d8d.chunk.js.map",
     "static/js/3.5308df22.chunk.js": "/shootyboats/static/js/3.5308df22.chunk.js",
     "static/js/3.5308df22.chunk.js.map": "/shootyboats/static/js/3.5308df22.chunk.js.map",
     "index.html": "/shootyboats/index.html",
     "static/css/main.ffda2ec0.chunk.css.map": "/shootyboats/static/css/main.ffda2ec0.chunk.css.map",
-    "static/js/2.413e3a22.chunk.js.LICENSE.txt": "/shootyboats/static/js/2.413e3a22.chunk.js.LICENSE.txt"
+    "static/js/2.e6149d8d.chunk.js.LICENSE.txt": "/shootyboats/static/js/2.e6149d8d.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.3a38f38e.js",
-    "static/js/2.413e3a22.chunk.js",
+    "static/js/2.e6149d8d.chunk.js",
     "static/css/main.ffda2ec0.chunk.css",
-    "static/js/main.71771889.chunk.js"
+    "static/js/main.9846b401.chunk.js"
   ]
 }
