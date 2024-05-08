@@ -6,7 +6,7 @@ import '../styles/GameWindow.css'
 import useGameEngine from '../hooks/useGameEngine'
 import use3DBoard from '../hooks/use3DBoard'
 
-
+import DebugPanel from './DebugPanel';
 
 // Component
 export default function GameWindow() {
@@ -22,7 +22,7 @@ export default function GameWindow() {
   const [engine, moves, gameStateRef, makeMove] = useGameEngine();
   const [viewerData, messageDataRef, moveData] = use3DBoard(renderCanvas, gameStateRef, engine, playerId);
   const [status, setStatus] = useState('Waiting');
-  const [details, setDetails] = useState();
+  const [showControls, setShowControls] = useState(true)
 
   const moveAndUpdate = (move) => {
     setStatus('Move sent. Waiting for engine...');
@@ -78,90 +78,41 @@ export default function GameWindow() {
     )
   })
 
-  // Create the updated game engine details when they change
-
-  useEffect(() => {
-    const makeDetails = (obj, recursive = false) => {
-      let list = []
-      for(const key in obj) {
-        if(obj[key] instanceof Object || Array.isArray(obj[key])) {
-          list.push(
-            <details>
-              <summary>{key}</summary>
-              {recursive ? makeDetails(obj[key], recursive) : `${obj[key]}`}
-            </details>
-          )
-        }
-        else {
-          list.unshift(<li>{key}: {obj[key]}</li>)
-        }
-      }
-  
-      return (<ul>{list}</ul>)
-    }
-
-    setDetails(makeDetails(gameStateRef.current, true));
-  }, [gameStateRef.current])
-
-
-  const makeString = (arr) => {
-    if(!Array.isArray(arr)) {
-      arr = Object.values(arr)
-    }
-    return arr.map(pos => Number.parseFloat(pos).toFixed(2)).join(', ');
-  }
-
-  const mouseData = viewerData.pointer.normalizedPosition;
-  const cameraPos = viewerData.camera.position;
-  const cameraRot = viewerData.camera.rotation;
-
-  const mouseDataText = makeString(mouseData);
-  const cameraPosText = makeString(cameraPos);
-  const cameraRotText = makeString(cameraRot);
-
-  let currentHoverInfo = [];
-  for (let key in viewerData.currentHover) {
-    currentHoverInfo.push(<li key={key}>{key}: {JSON.stringify(viewerData.currentHover[key])}</li>)
-  }
-
   // TODO: Set up the debugging info so it only recalculates
   // when a move is reported.
   return (
     <div className="game-window">
       <div id="status">Status: {status.msg}</div>
-      <div id="info">
-        <h2>Debug panel</h2>
-        <p>Board update: {` ${messageDataRef.current.update}, ${messageDataRef.current.timestamp}`}</p>
-        <ul>
-          <li>Mouse: {mouseDataText}</li>
-          <li>Camera pos: {cameraPosText}</li>
-          <li>Camera rot: {cameraRotText}</li>
-        </ul>
-        <details>
-          <summary>Current hover info</summary>
-          <ul>
-            {currentHoverInfo}
-          </ul>
-        </details>
-        <button 
-          onClick={() => handleClick()}
-          disabled={true}
-          >
-          Start the game
-        </button>
-        <details>
-          <summary>Game engine state</summary>
-          {details}
-        </details>
-        <details>
-          <summary>Last move results:</summary>
-          {/* {makeDetails(status.results, true)} */}
-        </details>
-        <details>
-          <summary>Controls info</summary>
-          {/* {makeDetails(viewerData.controls, false)} */}
-        </details>
+      <div id="controls">
+        <p><strong>---- The controls still have some bugs. If they feel broken, try refreshing the page! ----</strong></p>
+        <p>This is an early-stage experiment, <strong>not a full playable game</strong>. Currently, you can move the board and place your "ships" on your board (the left-hand set of light blue tiles)</p>
+        <p>The right-hand side of the board will detect mouse hover on its tiles, but is otherwise inactive.</p>
+        <div id="control-columns">
+          <div class="control-col">
+            <h3>Camera controls:</h3>
+            <ul>
+              <li>Hold left click to pan camera</li>
+              <li>Hold right click to rotate camera</li>
+              <li>Scroll to zoom</li>
+            </ul>
+          </div>
+          <div class="control-col">
+            <h3>Ship placement:</h3>
+            <ul>
+              <li>Left-click a ship to pick it up</li>
+              <li>Scroll to rotate a ship while it's being held</li>
+              <li>While holding a ship, click a valid tile to place the ship</li>
+              <li>The ship must fit inside the light blue squares on your board without overlapping other ships!</li>
+            </ul>
+          </div>
+        </div>
+
       </div>
+      <DebugPanel
+        gameStateRef={gameStateRef}
+        viewerData={viewerData}
+        messageDataRef={messageDataRef}
+        debugClick={handleClick} />
 {/*       <div id="fps">
         <span>FPS:{viewerData.fps}</span>
       </div> */}
