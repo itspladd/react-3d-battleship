@@ -174,11 +174,12 @@ class BattleshipControls extends MapControls {
 
   onPointerMove(event) {
     //calculate mouse position and save it
-    this._pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-    this._pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
+    const { width, height } = event.target.getBoundingClientRect()
+    this._pointer.x = (event.offsetX / width) * 2 - 1;
+    this._pointer.y = - (event.offsetY / height) * 2 + 1;
     const pointer = {
       normalizedPosition: [this._pointer.x, this._pointer.y],
-      rawPosition: [event.clientX, event.clientY]
+      rawPosition: [event.offsetX, event.offsetY]
     }
     const cam = {
       position: this.camera.position,
