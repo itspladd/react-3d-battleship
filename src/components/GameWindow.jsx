@@ -7,6 +7,7 @@ import useGameEngine from '../hooks/useGameEngine'
 import use3DBoard from '../hooks/use3DBoard'
 
 import DebugPanel from './DebugPanel';
+import ControlsPanel from './ControlsPanel';
 
 // Component
 export default function GameWindow() {
@@ -22,7 +23,6 @@ export default function GameWindow() {
   const [engine, moves, gameStateRef, makeMove] = useGameEngine();
   const [viewerData, messageDataRef, moveData] = use3DBoard(renderCanvas, gameStateRef, engine, playerId);
   const [status, setStatus] = useState('Waiting');
-  const [showControls, setShowControls] = useState(true)
 
   const moveAndUpdate = (move) => {
     setStatus('Move sent. Waiting for engine...');
@@ -82,37 +82,18 @@ export default function GameWindow() {
   // when a move is reported.
   return (
     <div className="game-window">
-      <div id="status">Status: {status.msg}</div>
-      <div id="controls">
-        <p><strong>---- The controls still have some bugs. If they feel broken, try refreshing the page! ----</strong></p>
-        <p>This is an early-stage experiment, <strong>not a full playable game</strong>. Currently, you can move the board and place your "ships" on your board (the left-hand set of light blue tiles)</p>
-        <p>The right-hand side of the board will detect mouse hover on its tiles, but is otherwise inactive.</p>
-        <div id="control-columns">
-          <div class="control-col">
-            <h3>Camera controls:</h3>
-            <ul>
-              <li>Hold left click to pan camera</li>
-              <li>Hold right click to rotate camera</li>
-              <li>Scroll to zoom</li>
-            </ul>
-          </div>
-          <div class="control-col">
-            <h3>Ship placement:</h3>
-            <ul>
-              <li>Left-click a ship to pick it up</li>
-              <li>Scroll to rotate a ship while it's being held</li>
-              <li>While holding a ship, click a valid tile to place the ship</li>
-              <li>The ship must fit inside the light blue squares on your board without overlapping other ships!</li>
-            </ul>
-          </div>
-        </div>
+      <div className="panels">
+        <DebugPanel
+          gameStateRef={gameStateRef}
+          viewerData={viewerData}
+          messageDataRef={messageDataRef}
+          debugClick={handleClick}
+        />
+        <ControlsPanel />
 
+        <div id="status">Game Status: {status.msg}</div>
       </div>
-      <DebugPanel
-        gameStateRef={gameStateRef}
-        viewerData={viewerData}
-        messageDataRef={messageDataRef}
-        debugClick={handleClick} />
+
 {/*       <div id="fps">
         <span>FPS:{viewerData.fps}</span>
       </div> */}

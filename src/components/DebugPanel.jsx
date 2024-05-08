@@ -41,10 +41,12 @@ export default function DebugPanel({
   }
 
   const mouseData = viewerData.pointer.normalizedPosition;
+  const rawMouseData = viewerData.pointer.rawPosition;
   const cameraPos = viewerData.camera.position;
   const cameraRot = viewerData.camera.rotation;
 
   const mouseDataText = makeString(mouseData);
+  const rawMouseDataText = makeString(rawMouseData);
   const cameraPosText = makeString(cameraPos);
   const cameraRotText = makeString(cameraRot);
 
@@ -57,7 +59,12 @@ export default function DebugPanel({
     <h2>Debug panel</h2>
     <p>Board update: {` ${messageDataRef.current.update}, ${messageDataRef.current.timestamp}`}</p>
     <ul>
-      <li>Mouse: {mouseDataText}</li>
+      <li>Mouse:
+        <ul>
+          <li>Normalized: {mouseDataText}</li>
+          <li>Raw: {rawMouseDataText}</li>
+        </ul>
+      </li>
       <li>Camera pos: {cameraPosText}</li>
       <li>Camera rot: {cameraRotText}</li>
     </ul>

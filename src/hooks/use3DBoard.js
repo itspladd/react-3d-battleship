@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import * as THREE from 'three';
 
 import GameViewer from '../classes/GameViewer'
 
@@ -32,15 +31,16 @@ export default function use3DBoard(canvasRef, gameStateRef, engine, playerId) {
   const messageDataRef = useRef({ update: false, timestamp: Date.now() });
   //console.log('refreshing?')
 
+  // Initialize the game viewer once on start.
   useEffect(() => {
     // === THREE.JS CODE START ===
-
-
     const viewer = new GameViewer(window, canvasRef, setViewerData, messageDataRef, setMoveData, engine)
     viewer.initGame(gameStateRef, playerId, engine)
 
     viewer.animate();
     // === THREE.JS CODE END ===
+    // We only want this initialization to happen once, so the empty dependency array is intentional here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return [viewerData, messageDataRef, moveData]
