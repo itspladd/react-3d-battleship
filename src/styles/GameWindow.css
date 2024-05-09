@@ -63,6 +63,8 @@
 }
 
 #status {
+  height: fit-content;
+  margin: 0;
   font-family: monospace;
   text-align: center;
   z-index: 100;
