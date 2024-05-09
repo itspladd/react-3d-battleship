@@ -28,7 +28,7 @@ export default function GameWindow() {
     setStatus('Move sent. Waiting for engine...');
     makeMove(move)
       .then(results => {
-        console.log(results)
+        //console.log(results)
         setStatus({
           msg: `Move handled. Results: ${results.valid && 'Valid'}. Updating board...`,
           results
@@ -91,7 +91,7 @@ export default function GameWindow() {
         />
         <ControlsPanel />
 
-        <div id="status">Game Status: {status.msg}</div>
+        <p id="status">Game Status: {status.msg}</p>
       </div>
 
 {/*       <div id="fps">

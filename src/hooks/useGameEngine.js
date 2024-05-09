@@ -11,7 +11,7 @@ export default function useGameEngine() {
   ];
   const newEngine = new GameEngine({players})
   newEngine.timestamp = Date.now();
-  const [engine, setEngine] = useState(newEngine);
+  const [engine, /* setEngine */] = useState(newEngine);
   const [moves, setMoves] = useState({});
   const gameStateRef = useRef(engine.gameState);
 
@@ -21,7 +21,7 @@ export default function useGameEngine() {
 
 
   const makeMove = async (move) => {
-    console.log('making a move: ', move)
+    //console.log('making a move: ', move)
     const results = await engine.inputMove(move);
     gameStateRef.current = results.gameState
     return results;

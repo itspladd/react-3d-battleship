@@ -1,10 +1,13 @@
 import * as THREE from 'three';
 
 import { MapControls } from 'three/examples/jsm/controls/OrbitControls'
+
+// The `Ship` class isn't used, but we need to import it here to avoid a webpack error.
+// I think there are some circular dependency issues in the game classes that should be fixed.
 import Ship from './Ship';
 import Tiles from './Tile';
 
-const { Tile, PlayerBoardTile } = Tiles;
+const { PlayerBoardTile } = Tiles;
 const { MOVES } = require('@itspladd/battleship-engine').CONSTANTS.RULES.DEFAULT_RULES
 
 
