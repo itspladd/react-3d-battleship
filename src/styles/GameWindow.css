@@ -63,13 +63,11 @@
 }
 
 #status {
-  height: fit-content;
-  margin: 0;
   font-family: monospace;
-  text-align: center;
+  text-align: left;
   z-index: 100;
   display: block;
-  color: #ff0000
+  color: #00ff00
 }
 
 #fps {

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 
 export default function DebugPanel({
+  status,
   gameStateRef,
   viewerData,
   messageDataRef,
@@ -57,6 +58,10 @@ export default function DebugPanel({
   return (
     <div id="info">
     <h2>Debug panel</h2>
+    <p>Game Status: </p>
+    <ul>
+      <li id="status">{status}</li>
+    </ul>
     <p>Board update: {` ${messageDataRef.current.update}, ${messageDataRef.current.timestamp}`}</p>
     <ul>
       <li>Mouse:

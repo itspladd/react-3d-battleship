@@ -84,6 +84,7 @@ export default function GameWindow() {
     <div className="game-window">
       <div className="panels">
         <DebugPanel
+          status={status.msg}
           gameStateRef={gameStateRef}
           viewerData={viewerData}
           messageDataRef={messageDataRef}
@@ -91,7 +92,6 @@ export default function GameWindow() {
         />
         <ControlsPanel />
 
-        <p id="status">Game Status: {status.msg}</p>
       </div>
 
 {/*       <div id="fps">
