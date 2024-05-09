@@ -1,6 +1,15 @@
 # shootyboats
-A full-stack multiplayer Battleship clone built with React and three.js. Uses a custom-built engine to run the game logic: https://github.com/itspladd/battleship-engine
+A 3D interface for a Battleship-like game built with React and [three.js](https://threejs.org/). Under the hood, my [battleship-engine](https://github.com/itspladd/battleship-engine) code runs the game logic.
 
-## 🚧 Currently in development 🚧
+## 🚧 Development paused 🚧
 
-Check the [Milestones](https://github.com/itspladd/react-3d-battleship/milestones?direction=asc&sort=due_date) page to see what I'm working on!
+Currently, this is an early proof-of-concept, **not a full playable game**. Feel free to download the repo and mess around with it locally!
+
+## Installation
+
+**Prerequisites:** A basic Node.js installation
+
+1. Clone the repository
+2. Run `npm install`
+3. Run `npm start`
+4. Navigate to `localhost:3000` to load the app. See the in-app instructions for controls and limitations!
